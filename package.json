@@ -1,0 +1,74 @@
+{
+  "name": "smoque",
+  "version": "0.1.0-alpha.0",
+  "description": "Script-first smoke tests for real project behavior.",
+  "author": "zsumz <shawn@zsumz.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zsumz/smoque.git"
+  },
+  "homepage": "https://github.com/zsumz/smoque#readme",
+  "bugs": {
+    "url": "https://github.com/zsumz/smoque/issues"
+  },
+  "type": "module",
+  "bin": {
+    "smoque": "./dist/cli/main.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./plugin": {
+      "types": "./dist/plugin.d.ts",
+      "default": "./dist/plugin.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts"
+  ],
+  "packageManager": "npm@10.9.8",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "keywords": [
+    "smoke-test",
+    "testing",
+    "typescript",
+    "cli",
+    "ci",
+    "integration-testing"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "node scripts/clean-dist.mjs",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "smoke": "npm run build && node dist/cli/main.js run smoke/",
+    "smoke:examples": "npm run build && node dist/cli/main.js run examples/runnable/",
+    "smoke:list": "npm run build && node dist/cli/main.js list smoke/",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && vitest run",
+    "coverage": "npm run build && vitest run --coverage",
+    "coverage:check": "npm run build && SMOQUE_COVERAGE_CHECK=1 vitest run --coverage",
+    "lint": "eslint src",
+    "archive:source": "git archive --format=tar.gz --output smoque-source.tgz HEAD",
+    "bin:local": "npm run build && node scripts/build-local-bin.mjs",
+    "prepack": "npm run build",
+    "validate:compat": "npm run typecheck && npm run lint && npm test && npm run smoke:list && node dist/cli/main.js run smoke/ --skip-tag package && npm run smoke:examples && npm pack --dry-run --json",
+    "validate": "npm run typecheck && npm run lint && npm test && npm run smoke:list && npm run smoke && npm run smoke:examples && npm pack --dry-run --json"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "^4.1.9",
+    "eslint": "^10.6.0",
+    "eslint-config-rubric": "^0.1.0-alpha.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.9"
+  },
+  "license": "MIT"
+}
