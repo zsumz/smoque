@@ -1,0 +1,3 @@
+# {{serviceName}}
+
+Generated service fixture.

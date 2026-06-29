@@ -1,0 +1,7 @@
+{
+  "name": "{{name}}",
+  "type": "module",
+  "bin": {
+    "{{bin}}": "./bin/cli.js"
+  }
+}
