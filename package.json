@@ -27,6 +27,8 @@
   },
   "types": "./dist/index.d.ts",
   "files": [
+    "README.md",
+    "smoque-logo.svg",
     "dist/**/*.js",
     "dist/**/*.d.ts"
   ],
