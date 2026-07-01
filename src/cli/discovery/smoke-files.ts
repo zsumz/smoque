@@ -84,7 +84,12 @@ function registerBundledRuntimeResolver(): void {
                 return { url: runtimeUrl, shortCircuit: true };
             }
 
-            return nextResolve(specifier, context);
+            const result = nextResolve(specifier, context);
+            if (/\.smoke\.ts$/u.test(result.url)) {
+                return { ...result, format: 'module-typescript' };
+            }
+
+            return result;
         },
     });
 

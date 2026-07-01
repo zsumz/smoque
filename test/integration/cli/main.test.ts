@@ -13,7 +13,7 @@ test("smoque --version prints the package version", async () => {
 
     assert.equal(result.exitCode, 0, cliResultSummary(result));
     assert.equal(result.stderr, "");
-    assert.match(result.stdout, /^0\.1\.0-alpha\.0\n$/u);
+    assert.match(result.stdout, /^0\.1\.0-alpha\.1\n$/u);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -957,6 +957,18 @@ test("smoque init writes a runnable smoke scaffold and smoke conventions", async
 
     const agents = await readFile(join(root, "smoke", "AGENTS.md"), "utf8");
     assert.match(agents, /^# Smoke Test Conventions/mu);
+
+    const listed = await runCli(["list"], root);
+
+    assert.equal(listed.exitCode, 0, cliResultSummary(listed));
+    assert.equal(listed.stderr, "");
+    assert.match(listed.stdout, /^project smoke\tsmoke\/project\.smoke\.ts\t-$/mu);
+
+    const ran = await runCli(["run"], root);
+
+    assert.equal(ran.exitCode, 0, cliResultSummary(ran));
+    assert.equal(ran.stderr, "");
+    assert.match(ran.stdout, /PASS node is available/u);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
