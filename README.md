@@ -1,8 +1,10 @@
+<br>
+
 <p align="center">
-  <img src="./smoque-logo.svg" alt="smoque" width="520">
+  <img src="./smoque-logo.svg" alt="smoque" width="560">
 </p>
 
-<p align="center"><strong>script-first smoke tests, invited to the cookout.</strong></p>
+<p align="center"><strong>helping builds earn their invite to the cookout.</strong></p>
 
 # smoque
 
