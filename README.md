@@ -16,8 +16,6 @@
 npm install --save-dev smoque
 ```
 
-Requires Node `22.18.0` or newer.
-
 ## First Run
 
 ```sh
@@ -75,3 +73,7 @@ Use smoque for checks that sit near the edge of the project:
 - Use `t.tempDir`, `t.workDir`, and built-in helpers.
 - Includes files, ports, processes, HTTP, npm packages, archives, Compose, and Postgres.
 - Keep smoke tests shallow. Prove one important path works.
+
+## Notes
+
+Requires Node `22.18.0` or newer.
