@@ -1,16 +1,14 @@
 <br>
 
 <p align="center">
-  <img src="./smoque-logo.svg" alt="smoque" width="560">
+  <img src="./smoque-logo.svg" alt="smoque" width="680">
 </p>
 
-<p align="center"><strong>helping builds earn their invite to the cookout.</strong></p>
+<p align="center"><strong>helping builds earn their invite to the cookout</strong></p>
 
 # smoque
 
 `smoque` is a small smoke-test runner for scripts, CLIs, packages, local services, and release artifacts.
-
-Write the last "does this actually work?" checks in TypeScript. Run them from the CLI. Keep them shallow enough to trust and fast enough to use.
 
 ## Install
 
@@ -72,6 +70,8 @@ Use smoque for checks that sit near the edge of the project:
 
 ## For Agents
 
-Run `npx smoque agents init` to add local smoke-test conventions. Prefer `t.cmd(command, args)` over shell strings when the arguments are known. Use `t.tempDir`, `t.workDir`, and built-in helpers for files, ports, processes, HTTP, npm packages, archives, Compose, and Postgres.
-
-Keep smoke tests shallow. Prove one important path works.
+- Run `npx smoque agents init` to add local smoke-test conventions.
+- Prefer `t.cmd(command, args)` over shell strings when the arguments are known.
+- Use `t.tempDir`, `t.workDir`, and built-in helpers.
+- Includes files, ports, processes, HTTP, npm packages, archives, Compose, and Postgres.
+- Keep smoke tests shallow. Prove one important path works.
