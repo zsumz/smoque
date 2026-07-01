@@ -4,7 +4,7 @@
   <img src="./smoque-logo.svg" alt="smoque" width="680">
 </p>
 
-<p align="center"><strong>helping builds earn their invite to the cookout</strong></p>
+<p align="center"><strong>every cookout needs a little smoke</strong></p>
 
 # smoque
 

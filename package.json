@@ -13,7 +13,7 @@
   },
   "type": "module",
   "bin": {
-    "smoque": "./dist/cli/main.js"
+    "smoque": "dist/cli/main.js"
   },
   "exports": {
     ".": {
@@ -27,6 +27,7 @@
   },
   "types": "./dist/index.d.ts",
   "files": [
+    "LICENSE",
     "README.md",
     "smoque-logo.svg",
     "dist/**/*.js",

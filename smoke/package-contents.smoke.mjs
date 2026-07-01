@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { expect, forbidden, smoke } from "smoque";
 
 const expectedEntries = [
+  "package/LICENSE",
   "package/dist/index.js",
   "package/dist/core.js",
   "package/dist/plugin.js",
