@@ -85,7 +85,7 @@ function registerBundledRuntimeResolver(): void {
             }
 
             const result = nextResolve(specifier, context);
-            if (/\.smoke\.ts$/u.test(result.url)) {
+            if (result.url.endsWith('.smoke.ts')) {
                 return { ...result, format: 'module-typescript' };
             }
 
