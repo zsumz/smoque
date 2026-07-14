@@ -1,6 +1,6 @@
 {
   "name": "smoque",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "description": "Script-first smoke tests for real project behavior.",
   "author": "zsumz <shawn@zsumz.com>",
   "repository": {

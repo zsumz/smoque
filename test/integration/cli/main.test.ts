@@ -13,7 +13,7 @@ test("smoque --version prints the package version", async () => {
 
     assert.equal(result.exitCode, 0, cliResultSummary(result));
     assert.equal(result.stderr, "");
-    assert.match(result.stdout, /^0\.1\.0-alpha\.1\n$/u);
+    assert.match(result.stdout, /^0\.1\.0-alpha\.2\n$/u);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
