@@ -6,6 +6,7 @@ import { beforeEach, test } from "vitest";
 
 import { resetSmokeRegistry, runRegisteredSuites, smoke } from "../../../../dist/core.js";
 import nodePlugin from "../../../../dist/plugins/node.js";
+import { npmPack } from "../../../../dist/plugins/node/npm-pack.js";
 
 beforeEach(() => {
   resetSmokeRegistry();
@@ -42,6 +43,154 @@ test("t.npm.pack creates a tarball and returns package metadata", async () => {
 
     assert.equal(result.status, "passed");
     await access(tarballPath);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("t.npm.pack allows scripts by default and supports ignoring them", async () => {
+  const root = await mkdtemp(join(tmpdir(), "smoque-node-pack-scripts-"));
+  const destination = join(root, "packed");
+  const allowedRoot = join(root, "allowed-package");
+  const ignoredRoot = join(root, "ignored-package");
+  const legacyIgnoredRoot = join(root, "legacy-ignored-package");
+
+  try {
+    await mkdir(destination, { recursive: true });
+    await writeLifecyclePackage(allowedRoot, "pack-scripts-allowed");
+    await writeLifecyclePackage(ignoredRoot, "pack-scripts-ignored");
+    await writeLifecyclePackage(legacyIgnoredRoot, "pack-scripts-legacy-ignored");
+
+    smoke.use(nodePlugin());
+    smoke.suite("pack script policy", async (t) => {
+      await t.npm.pack({ cwd: allowedRoot, destination });
+      await access(join(allowedRoot, "prepack-ran.txt"));
+
+      await t.npm.pack({ cwd: ignoredRoot, destination, scripts: "ignore" });
+      await assert.rejects(() => access(join(ignoredRoot, "prepack-ran.txt")), /ENOENT/u);
+
+      await t.npm.pack({ cwd: legacyIgnoredRoot, destination, ignoreScripts: true });
+      await assert.rejects(() => access(join(legacyIgnoredRoot, "prepack-ran.txt")), /ENOENT/u);
+    });
+
+    const result = await runRegisteredSuites({ repoRoot: root });
+
+    assert.equal(result.status, "passed");
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("t.npm.pack rejects unknown script policies", async () => {
+  const root = await mkdtemp(join(tmpdir(), "smoque-node-pack-script-policy-"));
+
+  try {
+    smoke.use(nodePlugin());
+    smoke.suite("pack script policy", async (t) => {
+      await assert.rejects(
+        () => t.npm.pack({ scripts: "sometimes" }),
+        (error) => {
+          assert.equal(error.name, "SmokeError");
+          assert.match(error.message, /Unknown npm pack scripts policy: sometimes/u);
+          assert.deepEqual(error.details.expected, ["allow", "ignore"]);
+          return true;
+        },
+      );
+    });
+
+    const result = await runRegisteredSuites({ repoRoot: root });
+
+    assert.equal(result.status, "passed");
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("t.npm.pack reports lifecycle failure output", async () => {
+  const root = await mkdtemp(join(tmpdir(), "smoque-node-pack-failure-"));
+  const packageRoot = join(root, "package");
+  const destination = join(root, "packed");
+
+  try {
+    await mkdir(destination, { recursive: true });
+    await writeLifecyclePackage(
+      packageRoot,
+      "pack-script-fails",
+      [
+        "console.log('prepack stdout marker');",
+        "console.error('prepack stderr marker');",
+        "process.exit(7);",
+      ].join("\n"),
+    );
+
+    smoke.use(nodePlugin());
+    smoke.suite("pack lifecycle failure", async (t) => {
+      await assert.rejects(
+        () => t.npm.pack({ cwd: packageRoot, destination }),
+        (error) => {
+          assert.equal(error.name, "SmokeError");
+          assert.match(error.message, /npm pack failed with exit code/u);
+          assert.equal(error.details.cwd, packageRoot);
+          assert.equal(error.details.scripts, "allow");
+
+          const output = `${String(error.details.stdout)}\n${String(error.details.stderr)}`;
+          assert.match(output, /prepack stdout marker/u);
+          assert.match(output, /prepack stderr marker/u);
+          return true;
+        },
+      );
+    });
+
+    const result = await runRegisteredSuites({ repoRoot: root });
+
+    assert.equal(result.status, "passed");
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("t.npm.pack parses lifecycle output and reports malformed results", async () => {
+  const root = await mkdtemp(join(tmpdir(), "smoque-node-pack-output-"));
+  const tarball = "pack-output-fixture-1.2.3.tgz";
+
+  try {
+    await writeFile(join(root, tarball), "packed", "utf8");
+
+    const artifact = await npmPack(fakePackContext(root, [
+      "> pack-output-fixture@1.2.3 prepack",
+      "> node prepack.cjs",
+      JSON.stringify([{ filename: tarball, name: "pack-output-fixture", version: "1.2.3" }]),
+    ].join("\n")));
+
+    assert.equal(artifact.filename, tarball);
+    assert.equal(artifact.packageName, "pack-output-fixture");
+    assert.equal(artifact.version, "1.2.3");
+
+    await assert.rejects(
+      () => npmPack(fakePackContext(root, "not-json", "npm stderr")),
+      (error) => {
+        assert.equal(error.name, "SmokeError");
+        assert.match(error.message, /did not return parseable JSON/u);
+        assert.equal(error.details.stdout, "not-json");
+        assert.equal(error.details.stderr, "npm stderr");
+        return true;
+      },
+    );
+
+    await assert.rejects(
+      () => npmPack(fakePackContext(root, JSON.stringify([{ name: "missing-filename" }]))),
+      (error) => {
+        assert.equal(error.name, "SmokeError");
+        assert.match(error.message, /did not include a tarball filename/u);
+        assert.deepEqual(error.details.parsed, [{ name: "missing-filename" }]);
+        return true;
+      },
+    );
+
+    await assert.rejects(
+      () => npmPack(fakePackContext(root, JSON.stringify([{ filename: "missing.tgz" }]))),
+      /no tarball was found/u,
+    );
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -231,6 +380,34 @@ function createScriptPackageJson() {
   };
 }
 
+async function writeLifecyclePackage(packageRoot, name, prepackSource) {
+  await mkdir(packageRoot, { recursive: true });
+  await writeFile(
+    join(packageRoot, "package.json"),
+    JSON.stringify(createLifecyclePackageJson(name), null, 2),
+    "utf8",
+  );
+  await writeFile(join(packageRoot, "index.js"), "export const ok = true;\n", "utf8");
+  await writeFile(
+    join(packageRoot, "prepack.cjs"),
+    prepackSource ?? "require('node:fs').writeFileSync('prepack-ran.txt', 'yes');\n",
+    "utf8",
+  );
+}
+
+function createLifecyclePackageJson(name) {
+  return {
+    name,
+    version: "1.2.3",
+    type: "module",
+    scripts: {
+      prepack: "node prepack.cjs",
+    },
+    exports: "./index.js",
+    files: ["index.js", "prepack.cjs"],
+  };
+}
+
 function createSurfacePackageJson() {
   return {
     name: "surface-fixture",
@@ -251,5 +428,21 @@ function createSurfacePackageJson() {
     },
     types: "./dist/index.d.ts",
     files: ["dist"],
+  };
+}
+
+function fakePackContext(root, stdout, stderr = "") {
+  return {
+    repoRoot: () => root,
+    tempDir: async () => root,
+    cmd: async (command, args, options) => ({
+      command,
+      args,
+      cwd: options.cwd,
+      durationMs: 1,
+      exitCode: 0,
+      stdout,
+      stderr,
+    }),
   };
 }
