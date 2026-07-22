@@ -4,31 +4,68 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  lint-test:
-    name: Lint and test
+  validate:
+    name: Validate Node ${{ matrix.node-label }}
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - node-label: 22.x
+            node-version: 22.18.0
+          - node-label: 24.x
+            node-version: 24.x
+          - node-label: 26.x
+            node-version: 26.x
+
     steps:
-      - name: Checkout
+      - name: Check out repo
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: ${{ matrix.node-version }}
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint
-        run: npm run lint
+      - name: Show runtime
+        run: |
+          node --version
+          npm --version
+          openssl version
 
-      - name: Test
-        run: npm test
+      - name: Validate package
+        run: npm run validate
+
+  coverage:
+    name: Coverage gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.18.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check coverage
+        run: npm run coverage:check
