@@ -1,5 +1,4 @@
 export const legacyLineLimits: ReadonlyMap<string, number> = new Map([
-    ['src/plugins/compose/compose-project.ts', 193],
     ['src/plugins/http/client.ts', 333],
     ['src/plugins/http/fake-server.ts', 218],
     ['src/process.ts', 333],
