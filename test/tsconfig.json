@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "types": ["node", "vitest/globals"]
+  },
+  "include": [
+    "integration/cli/**/*.ts",
+    "unit/core/caller-file.test.ts",
+    "unit/core/env-reader.test.ts",
+    "unit/core/json-path.test.ts",
+    "unit/core/poll.test.ts",
+    "unit/core/with-environment.ts"
+  ]
+}
