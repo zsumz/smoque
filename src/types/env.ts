@@ -1,4 +1,4 @@
-import type { PathRef } from './common.js';
+import type { PathRef } from './path-ref.js';
 
 export interface EnvReader {
     string(name: string, options?: EnvStringOptions): string;

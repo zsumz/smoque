@@ -1,4 +1,4 @@
-import type { PathRef } from './common.js';
+import type { PathRef } from './path-ref.js';
 import type { Probe } from './probe.js';
 
 export interface FileSystemApi {

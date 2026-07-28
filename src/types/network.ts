@@ -1,4 +1,4 @@
-import type { DurationString } from './common.js';
+import type { DurationString } from './duration.js';
 import type { Probe } from './probe.js';
 
 export interface NetApi {

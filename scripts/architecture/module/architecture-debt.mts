@@ -1,7 +1,3 @@
-export const legacyGenericModules: ReadonlySet<string> = new Set([
-    'src/types/common.ts',
-]);
-
 export const legacySourceIndexes: ReadonlySet<string> = new Set([
     'src/assertions/index.ts',
     'src/command/index.ts',
@@ -10,5 +6,4 @@ export const legacySourceIndexes: ReadonlySet<string> = new Set([
     'src/plugins/http/index.ts',
     'src/plugins/node/index.ts',
     'src/plugins/postgres/index.ts',
-    'src/types/index.ts',
 ]);

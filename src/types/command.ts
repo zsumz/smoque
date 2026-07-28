@@ -1,4 +1,5 @@
-import type { DurationString, PathRef } from './common.js';
+import type { DurationString } from './duration.js';
+import type { PathRef } from './path-ref.js';
 
 export interface CommandOptions {
     cwd?: string | PathRef;

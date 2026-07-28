@@ -1,5 +1,7 @@
 import type { CommandResult } from './command.js';
-import type { ChecksumAlgorithm, DurationString, PathRef } from './common.js';
+import type { ChecksumAlgorithm } from './checksum.js';
+import type { DurationString } from './duration.js';
+import type { PathRef } from './path-ref.js';
 
 export interface ExecutableOptions {
     args?: string[];

@@ -1,6 +1,6 @@
 import type { ArtifactSink } from './artifacts.js';
 import type { CommandOptions, CommandResult } from './command.js';
-import type { PathRef } from './common.js';
+import type { PathRef } from './path-ref.js';
 import type { EnvReader } from './env.js';
 import type { FileSystemApi, WorkDirOptions } from './filesystem.js';
 import type { FixtureApi } from './fixture.js';

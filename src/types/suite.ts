@@ -1,5 +1,5 @@
 import type { SerializedSmokeError, SmokeEventSink } from '../events.js';
-import type { PathRef } from './common.js';
+import type { PathRef } from './path-ref.js';
 
 export interface SuiteOptions {
     tags?: string[];

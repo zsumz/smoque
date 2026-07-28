@@ -1,4 +1,4 @@
-import type { DurationString } from './common.js';
+import type { DurationString } from './duration.js';
 import type { ProcessHandle } from './process.js';
 
 export interface PollOptions {

@@ -1,8 +1,5 @@
 import path from 'node:path';
-import {
-    legacyGenericModules,
-    legacySourceIndexes,
-} from './architecture-debt.mts';
+import { legacySourceIndexes } from './architecture-debt.mts';
 
 export const moduleLineLimit = 150;
 
@@ -26,10 +23,7 @@ export function inspectModuleLayout(relative: string, lineCount: number): string
             + `${String(moduleLineLimit)}-line limit.`,
         );
     }
-    if (
-        forbiddenModuleNames.has(path.posix.basename(relative))
-        && !legacyGenericModules.has(relative)
-    ) {
+    if (forbiddenModuleNames.has(path.posix.basename(relative))) {
         failures.push(`${relative}: generic junk-drawer module names are forbidden.`);
     }
     if (
@@ -62,7 +56,7 @@ export function inspectArchitectureDebt(
     const failures: string[] = [];
     const fileSet = new Set(files);
 
-    for (const file of [...legacyGenericModules, ...legacySourceIndexes]) {
+    for (const file of legacySourceIndexes) {
         if (!fileSet.has(file)) {
             failures.push(`${file}: remove stale architecture debt for the deleted module.`);
         }
