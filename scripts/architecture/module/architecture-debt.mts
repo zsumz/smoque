@@ -12,7 +12,6 @@ export const legacyLineLimits: ReadonlyMap<string, number> = new Map([
     ['src/reporting/event-report-builder.ts', 293],
     ['src/reporting/junit-reporter.ts', 188],
     ['src/reporting/terminal-reporter.ts', 265],
-    ['test/integration/cli/main.test.ts', 1113],
     ['test/unit/assertions/expectations.test.ts', 422],
     ['test/unit/core/plugin-context.test.ts', 386],
     ['test/unit/core/redaction.test.ts', 239],
@@ -31,7 +30,6 @@ export const legacyLineLimits: ReadonlyMap<string, number> = new Map([
 
 export const legacyGenericModules: ReadonlySet<string> = new Set([
     'src/types/common.ts',
-    'test/integration/cli/helpers.ts',
 ]);
 
 export const legacySourceIndexes: ReadonlySet<string> = new Set([
