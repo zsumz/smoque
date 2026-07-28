@@ -1,7 +1,3 @@
-export const legacyLineLimits: ReadonlyMap<string, number> = new Map([
-    ['src/reporting/terminal-reporter.ts', 265],
-]);
-
 export const legacyGenericModules: ReadonlySet<string> = new Set([
     'src/types/common.ts',
 ]);

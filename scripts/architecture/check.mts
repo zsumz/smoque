@@ -42,7 +42,6 @@ for (const file of inspectedFiles) {
 }
 failures.push(...inspectArchitectureDebt(
     inspectedFiles.map((file) => relativePath(root, file)),
-    await readLineCounts(root, inspectedFiles),
 ));
 
 const sourceFiles = await collectModuleFiles(sourceRoot);
@@ -74,17 +73,4 @@ function hasRuntimeDependencies(value: unknown): boolean {
 
 function countLines(source: string): number {
     return source === '' ? 0 : source.split(/\r?\n/u).length - (source.endsWith('\n') ? 1 : 0);
-}
-
-async function readLineCounts(
-    projectRoot: string,
-    files: readonly string[],
-): Promise<ReadonlyMap<string, number>> {
-    const entries = await Promise.all(files.map(
-        async (file): Promise<[string, number]> => [
-            relativePath(projectRoot, file),
-            countLines(await readFile(file, 'utf8')),
-        ],
-    ));
-    return new Map(entries);
 }

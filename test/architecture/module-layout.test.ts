@@ -14,14 +14,6 @@ test('new modules cannot exceed the shared line limit', () => {
     );
 });
 
-test('legacy line debt may shrink but cannot grow', () => {
-    assert.deepEqual(inspectModuleLayout('src/reporting/terminal-reporter.ts', 200), []);
-    assert.match(
-        inspectModuleLayout('src/reporting/terminal-reporter.ts', 266).join('\n'),
-        /exceeds its 265-line limit/u,
-    );
-});
-
 test('generic modules and undeclared nested indexes are rejected', () => {
     assert.match(
         inspectModuleLayout('src/example/helpers.ts', 10).join('\n'),
@@ -33,13 +25,8 @@ test('generic modules and undeclared nested indexes are rejected', () => {
     );
 });
 
-test('resolved or deleted debt must be removed from the manifest', () => {
-    const files = ['src/reporting/terminal-reporter.ts'];
-    const resolved = inspectArchitectureDebt(
-        files,
-        new Map([['src/reporting/terminal-reporter.ts', moduleLineLimit]]),
-    );
+test('deleted architecture debt must be removed from the manifest', () => {
+    const stale = inspectArchitectureDebt([]);
 
-    assert.match(resolved.join('\n'), /remove resolved line-limit debt/u);
-    assert.match(resolved.join('\n'), /remove stale/u);
+    assert.match(stale.join('\n'), /remove stale architecture debt/u);
 });

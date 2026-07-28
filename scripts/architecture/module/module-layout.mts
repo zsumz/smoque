@@ -1,7 +1,6 @@
 import path from 'node:path';
 import {
     legacyGenericModules,
-    legacyLineLimits,
     legacySourceIndexes,
 } from './architecture-debt.mts';
 
@@ -20,12 +19,11 @@ const forbiddenModuleNames = new Set([
 
 export function inspectModuleLayout(relative: string, lineCount: number): string[] {
     const failures: string[] = [];
-    const legacyLimit = legacyLineLimits.get(relative);
 
-    if (lineCount > (legacyLimit ?? moduleLineLimit)) {
+    if (lineCount > moduleLineLimit) {
         failures.push(
             `${relative}: ${String(lineCount)} lines exceeds its `
-            + `${String(legacyLimit ?? moduleLineLimit)}-line limit.`,
+            + `${String(moduleLineLimit)}-line limit.`,
         );
     }
     if (
@@ -60,20 +58,10 @@ export function inspectModuleLayout(relative: string, lineCount: number): string
 
 export function inspectArchitectureDebt(
     files: readonly string[],
-    lineCounts: ReadonlyMap<string, number>,
 ): string[] {
     const failures: string[] = [];
     const fileSet = new Set(files);
 
-    for (const [file, limit] of legacyLineLimits) {
-        if (!fileSet.has(file)) {
-            failures.push(`${file}: remove stale line-limit debt for the deleted module.`);
-        } else if ((lineCounts.get(file) ?? 0) <= moduleLineLimit) {
-            failures.push(`${file}: remove resolved line-limit debt.`);
-        } else if ((lineCounts.get(file) ?? 0) > limit) {
-            failures.push(`${file}: legacy line debt increased beyond ${String(limit)}.`);
-        }
-    }
     for (const file of [...legacyGenericModules, ...legacySourceIndexes]) {
         if (!fileSet.has(file)) {
             failures.push(`${file}: remove stale architecture debt for the deleted module.`);
