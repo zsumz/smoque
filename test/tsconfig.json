@@ -11,6 +11,7 @@
     "unit/core/**/*.ts",
     "unit/plugins/archive/**/*.ts",
     "unit/plugins/compose/**/*.ts",
+    "unit/plugins/http/**/*.ts",
     "unit/reporting/**/*.ts",
     "unit/runtime/**/*.ts",
     "unit/system/**/*.ts"
