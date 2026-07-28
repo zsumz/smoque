@@ -1,13 +1,11 @@
-import {
-    createArchiveExpectation,
-    createCommandExpectation,
-    createDirectorySnapshotExpectation,
-    createFileExpectation,
-    createFileSetExpectation,
-    createTextSnapshotExpectation,
-    createValueExpectation,
-} from '../assertions/index.js';
+import { createArchiveExpectation } from '../assertions/archive/archive-expectation.js';
+import { createCommandExpectation } from '../assertions/command-expectation.js';
+import { createFileExpectation } from '../assertions/file/file-expectation.js';
+import { createFileSetExpectation } from '../assertions/file/file-set-expectation.js';
+import { createDirectorySnapshotExpectation } from '../assertions/snapshot/directory-snapshot.js';
+import { createTextSnapshotExpectation } from '../assertions/snapshot/text-snapshot.js';
 import type { SmokeExpectApi } from '../assertions/types.js';
+import { createValueExpectation } from '../assertions/value-expectation.js';
 
 export function createExpectApi(): SmokeExpectApi {
     const callable = (<T>(value: T) => createValueExpectation(value)) as SmokeExpectApi;

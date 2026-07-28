@@ -1,1 +1,1 @@
-export * from './command/index.js';
+export * from './command/run-command.js';
