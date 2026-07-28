@@ -12,8 +12,6 @@ export const legacyLineLimits: ReadonlyMap<string, number> = new Map([
     ['src/reporting/event-report-builder.ts', 293],
     ['src/reporting/junit-reporter.ts', 188],
     ['src/reporting/terminal-reporter.ts', 265],
-    ['test/unit/plugins/node/node.test.ts', 448],
-    ['test/unit/plugins/node/package-metadata.test.ts', 230],
     ['test/unit/plugins/postgres/postgres.test.ts', 449],
 ]);
 
