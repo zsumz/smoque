@@ -13,6 +13,7 @@
     "unit/plugins/compose/**/*.ts",
     "unit/plugins/http/**/*.ts",
     "unit/plugins/node/**/*.ts",
+    "unit/plugins/postgres/**/*.ts",
     "unit/reporting/**/*.ts",
     "unit/runtime/**/*.ts",
     "unit/system/**/*.ts"
