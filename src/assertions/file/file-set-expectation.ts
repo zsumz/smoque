@@ -1,9 +1,10 @@
-import { readdir, readFile, stat } from 'node:fs/promises';
-import { relative, resolve } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { relative } from 'node:path';
 
 import { SmokeError } from '../../errors.js';
 import { pathToString } from '../../path-ref.js';
 import type { FileSetExpectation, ForbiddenRule, PathRef } from '../../types.js';
+import { listMatchingFiles, normalizeFilePath } from './file-selection.js';
 import { forbidden } from './forbidden.js';
 
 export function createFileSetExpectation(root: string | PathRef): FileSetExpectation {
@@ -32,7 +33,7 @@ class FileSetExpectationImpl implements FileSetExpectation {
             const normalizedRules = Array.isArray(rules) ? rules : [rules];
 
             for (const file of files) {
-                const relativePath = normalizePath(relative(this.root, file));
+                const relativePath = normalizeFilePath(relative(this.root, file));
 
                 for (const rule of normalizedRules) {
                     const scope = rule.scope ?? 'content';
@@ -94,37 +95,8 @@ class FileSetExpectationImpl implements FileSetExpectation {
     }
 
     private async matchedFiles(): Promise<string[]> {
-        const files = await listFiles(this.root);
-        if (this.patterns.length === 0) {
-            return files;
-        }
-
-        return files.filter((file) => {
-            const rel = normalizePath(relative(this.root, file));
-            return this.patterns.some((pattern) => globToRegExp(pattern).test(rel));
-        });
+        return listMatchingFiles(this.root, this.patterns);
     }
-}
-
-async function listFiles(root: string): Promise<string[]> {
-    const entries = await readdir(root, { withFileTypes: true });
-    const files: string[] = [];
-
-    for (const entry of entries) {
-        const path = resolve(root, entry.name);
-        if (entry.isDirectory()) {
-            files.push(...await listFiles(path));
-        } else if (entry.isFile()) {
-            files.push(path);
-        } else if (entry.isSymbolicLink()) {
-            const target = await stat(path);
-            if (target.isFile()) {
-                files.push(path);
-            }
-        }
-    }
-
-    return files.sort();
 }
 
 function matches(content: string, pattern: string | RegExp): boolean {
@@ -150,42 +122,6 @@ function findForbiddenContent(
     return undefined;
 }
 
-function globToRegExp(pattern: string): RegExp {
-    const normalized = normalizePath(pattern);
-    let source = '';
-
-    for (let index = 0; index < normalized.length; index += 1) {
-        const char = normalized[index];
-        const next = normalized[index + 1];
-
-        if (char === '*' && next === '*') {
-            if (normalized[index + 2] === '/') {
-                source += '(?:.*\\/)?';
-                index += 2;
-            } else {
-                source += '.*';
-                index += 1;
-            }
-        } else if (char === '*') {
-            source += '[^/]*';
-        } else if (char === '?') {
-            source += '[^/]';
-        } else {
-            source += escapeRegExp(char ?? '');
-        }
-    }
-
-    return new RegExp(`^${source}$`, 'u');
-}
-
-function normalizePath(path: string): string {
-    return path.replace(/\\/gu, '/');
-}
-
 function formatPattern(pattern: string | RegExp): string {
     return typeof pattern === 'string' ? JSON.stringify(pattern) : String(pattern);
-}
-
-function escapeRegExp(value: string): string {
-    return value.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
 }
