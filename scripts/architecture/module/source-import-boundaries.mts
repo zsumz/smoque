@@ -2,6 +2,7 @@ import ts from 'typescript';
 import {
     facadeImportFailure,
 } from './facade-policy.mts';
+import { layerImportFailure } from './layer-import-policy.mts';
 import { relativePath } from './module-files.mts';
 import { resolveImportedSourceModule } from './source-module-target.mts';
 
@@ -28,14 +29,20 @@ export function inspectSourceImports(
             continue;
         }
         const start = sourceFile.getLineAndCharacterOfPosition(statement.getStart(sourceFile));
-        const failure = facadeImportFailure(
+        const prefix = `${relativeSource}:${String(start.line + 1)}:`
+            + `${String(start.character + 1)} `;
+        const facadeFailure = facadeImportFailure(
             relativeSource,
             relativeTarget,
             start.line + 1,
             start.character + 1,
         );
-        if (failure !== undefined) {
-            failures.push(failure);
+        if (facadeFailure !== undefined) {
+            failures.push(facadeFailure);
+        }
+        const layerFailure = layerImportFailure(relativeSource, relativeTarget);
+        if (layerFailure !== undefined) {
+            failures.push(prefix + layerFailure);
         }
     }
     return failures;
