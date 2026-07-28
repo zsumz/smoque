@@ -9,6 +9,13 @@ export async function collectJavaScriptModuleFiles(directory: string): Promise<s
     return collectFiles(directory, isJavaScriptModule);
 }
 
+export async function collectDirectJavaScriptModuleFiles(directory: string): Promise<string[]> {
+    const entries = await readdir(directory, { withFileTypes: true });
+    return entries
+        .filter((entry) => entry.isFile() && isJavaScriptModule(entry.name))
+        .map((entry) => path.join(directory, entry.name));
+}
+
 async function collectFiles(
     directory: string,
     accepts: (name: string) => boolean,

@@ -6,6 +6,7 @@ import { inspectPublicEntrypointContract } from './contract/public-entrypoints.m
 import { findDependencyCycles } from './dependency/find-dependency-cycles.mts';
 import { createRuntimeDependencyGraph } from './dependency/runtime-dependency-graph.mts';
 import {
+    collectDirectJavaScriptModuleFiles,
     collectJavaScriptModuleFiles,
     collectModuleFiles,
     relativePath,
@@ -25,6 +26,7 @@ const inspectedRoots = [
     examplesRoot,
 ];
 const allowedJavaScriptModules = new Set([
+    'eslint.config.mjs',
     'examples/templates/demo-cli/bin/cli.js',
 ]);
 const failures: string[] = [];
@@ -47,6 +49,7 @@ for (const file of inspectedFiles) {
 }
 const sourceFiles = await collectModuleFiles(sourceRoot);
 const javascriptModules = [
+    ...await collectDirectJavaScriptModuleFiles(root),
     ...await collectJavaScriptModuleFiles(sourceRoot),
     ...await collectJavaScriptModuleFiles(scriptsRoot),
     ...await collectJavaScriptModuleFiles(smokeRoot),
