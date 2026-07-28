@@ -3,7 +3,7 @@ import { expect, smoke } from "smoque";
 smoke.suite("standalone binary install smoke", { tags: ["binary", "package"] }, async (t) => {
   const install = await t.tempDir("standalone-smoque");
   const binary = install.path("smoque");
-  const generator = t.repoRoot().path("scripts", "build-local-bin.mjs");
+  const generator = t.repoRoot().path("scripts", "build-local-bin.mts");
 
   await t.step("build local executable artifact", async () => {
     await t.cmd(process.execPath, [generator, "--output", binary]);

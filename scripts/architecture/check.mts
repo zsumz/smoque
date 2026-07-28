@@ -14,10 +14,11 @@ import { checkModule } from './module/check-module.mts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const sourceRoot = path.join(root, 'src');
+const scriptsRoot = path.join(root, 'scripts');
 const inspectedRoots = [
     sourceRoot,
     path.join(root, 'test'),
-    path.join(root, 'scripts'),
+    scriptsRoot,
 ];
 const failures: string[] = [];
 
@@ -38,9 +39,13 @@ for (const file of inspectedFiles) {
     failures.push(...await checkModule(root, sourceRoot, file));
 }
 const sourceFiles = await collectModuleFiles(sourceRoot);
-for (const file of await collectJavaScriptModuleFiles(sourceRoot)) {
+const javascriptModules = [
+    ...await collectJavaScriptModuleFiles(sourceRoot),
+    ...await collectJavaScriptModuleFiles(scriptsRoot),
+];
+for (const file of javascriptModules) {
     failures.push(
-        `${relativePath(root, file)}: production source must use TypeScript modules.`,
+        `${relativePath(root, file)}: owned modules must use TypeScript.`,
     );
 }
 const graph = await createRuntimeDependencyGraph(root, sourceRoot, sourceFiles);
