@@ -1,6 +1,6 @@
 import { SmokeError } from '../../errors.js';
 import { createFixtureApi } from '../../fixture.js';
-import { createFileSystemApi, createTempDir, createWorkDir } from '../../filesystem.js';
+import { createFileSystemApi } from '../../filesystem.js';
 import { createLogApi } from '../../log.js';
 import { createNetApi } from '../../network.js';
 import { poll } from '../../poll.js';
@@ -23,7 +23,9 @@ import type {
 } from '../../types.js';
 import type { ExtensionBucket } from '../plugin-registry.js';
 import { createArtifactSink } from './artifact-sink.js';
+import { applyPluginExtensions } from './context-extensions.js';
 import { createEnvReader } from './env-reader.js';
+import { createManagedTempDir, createManagedWorkDir } from './managed-workdirs.js';
 import { SmokeSkipSignal } from './skip-signal.js';
 
 export interface SmokeContextHost {
@@ -73,30 +75,9 @@ export function createSmokeContext(host: SmokeContextHost): SmokeContext {
         cmd: async (command: string, args: string[] = [], options: CommandOptions = {}) =>
             host.runCommand(command, args, options),
         sh: async (script: string, options: CommandOptions = {}) => host.runCommand(script, [], { ...options, shell: true }),
-        tempDir: async (name?: string) => {
-            const dir = await createTempDir(name);
-            host.addCleanup(async () => {
-                if (host.keepWorkdirOnFail && host.preserveManagedWorkdirs()) {
-                    return;
-                }
-                await createFileSystemApi(host.root).rm(dir, { recursive: true, force: true });
-            });
-            return dir;
-        },
-        workDir: async (path: string, options: WorkDirOptions = {}) => {
-            const dir = await createWorkDir(host.root, path, options);
-            host.addCleanup(async () => {
-                if ((host.keepWorkdirOnFail || options.keepOnFail) && host.preserveManagedWorkdirs()) {
-                    return;
-                }
-                await createFileSystemApi(host.root).rm(dir, {
-                    recursive: true,
-                    force: true,
-                    refuse: [host.root, ...options.refuse ?? []],
-                });
-            });
-            return dir;
-        },
+        tempDir: async (name?: string) => createManagedTempDir(host, name),
+        workDir: async (path: string, options: WorkDirOptions = {}) =>
+            createManagedWorkDir(host, path, options),
         fixture: undefined,
         fs: createFileSystemApi(host.root),
         env: createEnvReader((value) => {
@@ -156,69 +137,4 @@ export function createSmokeContext(host: SmokeContextHost): SmokeContext {
 
     applyPluginExtensions(context, host);
     return context;
-}
-
-function applyPluginExtensions(context: SmokeContext, host: SmokeContextHost): void {
-    for (const [name, factory] of host.extensions.actions) {
-        assignDotted(context, name, async (...args: unknown[]) => {
-            const value = await factory(context, ...args);
-            if (isSmokeResource(value)) {
-                host.addManagedResource(value);
-            }
-            return value;
-        });
-    }
-    for (const [name, factory] of host.extensions.probes) {
-        assignDotted(context, name, (...args: unknown[]) => factory(context, args.length <= 1 ? args[0] : args));
-    }
-    for (const [name, factory] of host.extensions.resources) {
-        assignDotted(context, name, async (...args: unknown[]) => {
-            const resource = await factory(context, args.length <= 1 ? args[0] : args);
-            if (isSmokeResource(resource)) {
-                host.addManagedResource(resource);
-            }
-            return resource;
-        });
-    }
-    for (const [name, factory] of host.extensions.recipes) {
-        assignDotted(context, name, (options: unknown) => factory(context, options));
-    }
-}
-
-function assignDotted(target: object, dottedName: string, value: unknown): void {
-    const parts = dottedName.split('.').filter(Boolean);
-    if (parts.length === 0) {
-        throw new SmokeError(`Invalid plugin extension name: ${dottedName}`);
-    }
-
-    let cursor = target as Record<string, unknown>;
-    for (const part of parts.slice(0, -1)) {
-        const existing = cursor[part];
-        if (existing === undefined) {
-            const next: Record<string, unknown> = {};
-            cursor[part] = next;
-            cursor = next;
-            continue;
-        }
-
-        if (typeof existing !== 'object' || existing === null || Array.isArray(existing)) {
-            throw new SmokeError(`Plugin extension name conflicts with existing context property: ${dottedName}`);
-        }
-
-        cursor = existing as Record<string, unknown>;
-    }
-
-    const leaf = parts[parts.length - 1];
-    if (!leaf) {
-        throw new SmokeError(`Invalid plugin extension name: ${dottedName}`);
-    }
-    if (cursor[leaf] !== undefined) {
-        throw new SmokeError(`Duplicate plugin context extension: ${dottedName}`);
-    }
-
-    cursor[leaf] = value;
-}
-
-function isSmokeResource(value: unknown): value is SmokeResource {
-    return typeof value === 'object' && value !== null && 'cleanup' in value;
 }
