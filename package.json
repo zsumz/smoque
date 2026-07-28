@@ -54,6 +54,7 @@
     "smoke": "npm run build && node dist/cli/main.js run smoke/",
     "smoke:examples": "npm run build && node dist/cli/main.js run examples/runnable/",
     "smoke:list": "npm run build && node dist/cli/main.js list smoke/",
+    "api:update": "node scripts/architecture/contract/update-public-api.mts",
     "architecture:check": "node scripts/architecture/check.mts",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p scripts/tsconfig.json && tsc -p smoke/tsconfig.json && tsc -p examples/tsconfig.json && tsc -p test/architecture/tsconfig.json",
     "typecheck:tests": "tsc -p test/tsconfig.json && tsc -p test/integration/smoke-runner/tsconfig.json",

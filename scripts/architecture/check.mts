@@ -39,7 +39,7 @@ if (hasRuntimeDependencies(packageJson)) {
 }
 
 failures.push(...await inspectPublicEntrypointContract(root));
-failures.push(...inspectPublicApi(root));
+failures.push(...await inspectPublicApi(root));
 
 const inspectedFiles = (
     await Promise.all(inspectedRoots.map(collectModuleFiles))
