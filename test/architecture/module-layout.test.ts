@@ -15,10 +15,10 @@ test('new modules cannot exceed the shared line limit', () => {
 });
 
 test('legacy line debt may shrink but cannot grow', () => {
-    assert.deepEqual(inspectModuleLayout('src/process.ts', 200), []);
+    assert.deepEqual(inspectModuleLayout('src/reporting/event-report-builder.ts', 200), []);
     assert.match(
-        inspectModuleLayout('src/process.ts', 334).join('\n'),
-        /exceeds its 333-line limit/u,
+        inspectModuleLayout('src/reporting/event-report-builder.ts', 294).join('\n'),
+        /exceeds its 293-line limit/u,
     );
 });
 
@@ -34,10 +34,10 @@ test('generic modules and undeclared nested indexes are rejected', () => {
 });
 
 test('resolved or deleted debt must be removed from the manifest', () => {
-    const files = ['src/process.ts'];
+    const files = ['src/reporting/event-report-builder.ts'];
     const resolved = inspectArchitectureDebt(
         files,
-        new Map([['src/process.ts', moduleLineLimit]]),
+        new Map([['src/reporting/event-report-builder.ts', moduleLineLimit]]),
     );
 
     assert.match(resolved.join('\n'), /remove resolved line-limit debt/u);
