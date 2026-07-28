@@ -10,7 +10,6 @@ import {
     relativePath,
 } from './module/module-files.mts';
 import {
-    inspectArchitectureDebt,
     inspectModuleLayout,
 } from './module/module-layout.mts';
 
@@ -40,10 +39,6 @@ for (const file of inspectedFiles) {
     const source = await readFile(file, 'utf8');
     failures.push(...inspectModuleLayout(relativePath(root, file), countLines(source)));
 }
-failures.push(...inspectArchitectureDebt(
-    inspectedFiles.map((file) => relativePath(root, file)),
-));
-
 const sourceFiles = await collectModuleFiles(sourceRoot);
 const graph = await createRuntimeDependencyGraph(root, sourceRoot, sourceFiles);
 for (const cycle of findDependencyCycles(graph)) {

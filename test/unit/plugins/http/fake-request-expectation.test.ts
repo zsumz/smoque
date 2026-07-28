@@ -3,7 +3,7 @@ import { test } from 'vitest';
 
 import { resetSmokeRegistry, runRegisteredSuites, smoke } from '../../../../dist/core.js';
 import type { SmokeRunResult } from '../../../../dist/types.js';
-import type { CapturedRequestExpectation } from '../../../../dist/plugins/http/index.js';
+import type { CapturedRequestExpectation } from '../../../../dist/plugins/http.js';
 import httpPlugin from '../../../../dist/plugins/http.js';
 
 interface FailureScenario {

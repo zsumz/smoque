@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { beforeEach, test } from 'vitest';
 
 import { resetSmokeRegistry, runRegisteredSuites, smoke } from '../../../../dist/core.js';
-import type { FakeHttpServer } from '../../../../dist/plugins/http/index.js';
+import type { FakeHttpServer } from '../../../../dist/plugins/http.js';
 import httpPlugin from '../../../../dist/plugins/http.js';
 
 beforeEach(() => {

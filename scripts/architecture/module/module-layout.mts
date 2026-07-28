@@ -1,5 +1,4 @@
 import path from 'node:path';
-import { legacySourceIndexes } from './architecture-debt.mts';
 
 export const moduleLineLimit = 150;
 
@@ -30,7 +29,6 @@ export function inspectModuleLayout(relative: string, lineCount: number): string
         relative.startsWith('src/')
         && path.posix.basename(relative) === 'index.ts'
         && relative !== 'src/index.ts'
-        && !legacySourceIndexes.has(relative)
     ) {
         failures.push(
             `${relative}: add source entrypoints deliberately; nested index modules are forbidden.`,
@@ -46,20 +44,6 @@ export function inspectModuleLayout(relative: string, lineCount: number): string
         failures.push(
             `${relative}: architecture internals belong in an owned domain directory.`,
         );
-    }
-    return failures;
-}
-
-export function inspectArchitectureDebt(
-    files: readonly string[],
-): string[] {
-    const failures: string[] = [];
-    const fileSet = new Set(files);
-
-    for (const file of legacySourceIndexes) {
-        if (!fileSet.has(file)) {
-            failures.push(`${file}: remove stale architecture debt for the deleted module.`);
-        }
     }
     return failures;
 }
