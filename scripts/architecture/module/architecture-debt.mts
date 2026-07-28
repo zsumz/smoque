@@ -1,5 +1,4 @@
 export const legacyLineLimits: ReadonlyMap<string, number> = new Map([
-    ['src/plugins/http/fake-server.ts', 218],
     ['src/process.ts', 333],
     ['src/reporting/event-report-builder.ts', 293],
     ['src/reporting/junit-reporter.ts', 188],
