@@ -16,12 +16,17 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 const sourceRoot = path.join(root, 'src');
 const scriptsRoot = path.join(root, 'scripts');
 const smokeRoot = path.join(root, 'smoke');
+const examplesRoot = path.join(root, 'examples');
 const inspectedRoots = [
     sourceRoot,
     path.join(root, 'test'),
     scriptsRoot,
     smokeRoot,
+    examplesRoot,
 ];
+const allowedJavaScriptModules = new Set([
+    'examples/templates/demo-cli/bin/cli.js',
+]);
 const failures: string[] = [];
 
 const packageJson: unknown = JSON.parse(
@@ -45,10 +50,15 @@ const javascriptModules = [
     ...await collectJavaScriptModuleFiles(sourceRoot),
     ...await collectJavaScriptModuleFiles(scriptsRoot),
     ...await collectJavaScriptModuleFiles(smokeRoot),
+    ...await collectJavaScriptModuleFiles(examplesRoot),
 ];
 for (const file of javascriptModules) {
+    const relative = relativePath(root, file);
+    if (allowedJavaScriptModules.has(relative)) {
+        continue;
+    }
     failures.push(
-        `${relativePath(root, file)}: owned modules must use TypeScript.`,
+        `${relative}: owned modules must use TypeScript.`,
     );
 }
 const graph = await createRuntimeDependencyGraph(root, sourceRoot, sourceFiles);

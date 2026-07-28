@@ -1,12 +1,12 @@
-import { smoke } from "smoque";
+import { smoke } from 'smoque';
 
-smoke.suite("legacy smoke script", async (t) => {
-  await t.step("run existing browser smoke", async () => {
-    await t.cmd("node", ["scripts/browser-smoke.mjs"], {
-      cwd: t.repoRoot(),
-      timeout: "60s",
+smoke.suite('legacy smoke script', async (t) => {
+    await t.step('run existing browser smoke', async () => {
+        await t.cmd('node', ['scripts/browser-smoke.mjs'], {
+            cwd: t.repoRoot(),
+            timeout: '60s',
+        });
     });
-  });
 });
 
 // Migration path:
