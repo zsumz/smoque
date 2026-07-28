@@ -7,6 +7,7 @@ import {
     isPureReExportFacade,
 } from './source-facades.mts';
 import { inspectSourceImports } from './source-import-boundaries.mts';
+import { inspectSourceSafety } from './source-safety.mts';
 
 export async function checkModule(
     root: string,
@@ -31,6 +32,7 @@ export async function checkModule(
         failures.push(`${relative}: facade modules must contain only re-exports.`);
     }
     failures.push(...inspectSourceImports(root, sourceRoot, file, sourceFile));
+    failures.push(...inspectSourceSafety(root, file, sourceFile));
     return failures;
 }
 

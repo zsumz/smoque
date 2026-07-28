@@ -6,7 +6,9 @@ import { inspectPublicEntrypointContract } from './contract/public-entrypoints.m
 import { findDependencyCycles } from './dependency/find-dependency-cycles.mts';
 import { createRuntimeDependencyGraph } from './dependency/runtime-dependency-graph.mts';
 import {
+    collectJavaScriptModuleFiles,
     collectModuleFiles,
+    relativePath,
 } from './module/module-files.mts';
 import { checkModule } from './module/check-module.mts';
 
@@ -36,6 +38,11 @@ for (const file of inspectedFiles) {
     failures.push(...await checkModule(root, sourceRoot, file));
 }
 const sourceFiles = await collectModuleFiles(sourceRoot);
+for (const file of await collectJavaScriptModuleFiles(sourceRoot)) {
+    failures.push(
+        `${relativePath(root, file)}: production source must use TypeScript modules.`,
+    );
+}
 const graph = await createRuntimeDependencyGraph(root, sourceRoot, sourceFiles);
 for (const cycle of findDependencyCycles(graph)) {
     failures.push(`src: circular runtime dependency ${cycle.join(' -> ')}`);
