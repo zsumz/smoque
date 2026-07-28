@@ -54,17 +54,18 @@
     "smoke": "npm run build && node dist/cli/main.js run smoke/",
     "smoke:examples": "npm run build && node dist/cli/main.js run examples/runnable/",
     "smoke:list": "npm run build && node dist/cli/main.js list smoke/",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "architecture:check": "node scripts/architecture/check.mts",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p scripts/architecture/tsconfig.json && tsc -p test/architecture/tsconfig.json",
     "test": "npm run build && vitest run",
     "coverage": "npm run build && vitest run --coverage",
     "coverage:check": "npm run build && SMOQUE_COVERAGE_CHECK=1 vitest run --coverage",
-    "lint": "eslint src",
+    "lint": "eslint src scripts/architecture test/architecture",
     "archive:source": "git archive --format=tar.gz --output smoque-source.tgz HEAD",
     "bin:local": "npm run build && node scripts/build-local-bin.mjs",
     "prepack": "npm run build",
     "release:check": "npm run validate && npm run coverage:check && npm publish --dry-run --access public --json",
-    "validate:compat": "npm run typecheck && npm run lint && npm test && npm run smoke:list && node dist/cli/main.js run smoke/ --skip-tag package && npm run smoke:examples && npm pack --dry-run --json",
-    "validate": "npm run typecheck && npm run lint && npm test && npm run smoke:list && npm run smoke && npm run smoke:examples && npm pack --dry-run --json"
+    "validate:compat": "npm run typecheck && npm run lint && npm run architecture:check && npm test && npm run smoke:list && node dist/cli/main.js run smoke/ --skip-tag package && npm run smoke:examples && npm pack --dry-run --json",
+    "validate": "npm run typecheck && npm run lint && npm run architecture:check && npm test && npm run smoke:list && npm run smoke && npm run smoke:examples && npm pack --dry-run --json"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
