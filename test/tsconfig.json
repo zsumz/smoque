@@ -8,6 +8,7 @@
   "include": [
     "integration/cli/**/*.ts",
     "unit/core/**/*.ts",
+    "unit/runtime/**/*.ts",
     "unit/system/**/*.ts"
   ]
 }

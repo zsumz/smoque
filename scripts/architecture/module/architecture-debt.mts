@@ -20,9 +20,6 @@ export const legacyLineLimits: ReadonlyMap<string, number> = new Map([
     ['test/unit/plugins/node/package-metadata.test.ts', 230],
     ['test/unit/plugins/postgres/postgres.test.ts', 449],
     ['test/unit/reporting/reporters.test.ts', 432],
-    ['test/unit/runtime/command/command.test.ts', 203],
-    ['test/unit/runtime/process-tree.test.ts', 172],
-    ['test/unit/runtime/process/process.test.ts', 418],
 ]);
 
 export const legacyGenericModules: ReadonlySet<string> = new Set([

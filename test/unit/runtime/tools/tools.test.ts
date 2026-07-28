@@ -1,49 +1,56 @@
-import assert from "node:assert/strict";
-import { beforeEach, test } from "vitest";
+import assert from 'node:assert/strict';
+import { beforeEach, test } from 'vitest';
 
-import { resetSmokeRegistry, runRegisteredSuites, smoke } from "../../../../dist/core.js";
+import { resetSmokeRegistry, runRegisteredSuites, smoke } from '../../../../dist/core.js';
 
 beforeEach(() => {
-  resetSmokeRegistry();
+    resetSmokeRegistry();
 });
 
-test("t.tools discovers node and npm versions", async () => {
-  smoke.suite("tool discovery", async (t) => {
-    const node = await t.tools.node({ minVersion: 22 });
-    assert.equal(node.command, process.execPath);
-    assert.equal(node.path, process.execPath);
-    assertVersionAtLeast(node.version, 22);
+test('t.tools discovers node and npm versions', async () => {
+    smoke.suite('tool discovery', async (t) => {
+        const node = await t.tools.node({ minVersion: 22 });
+        assert.equal(node.command, process.execPath);
+        assert.equal(node.path, process.execPath);
+        assertVersionAtLeast(node.version, 22);
 
-    const npm = await t.tools.npm({ minVersion: 10 });
-    assert.equal(npm.command, "npm");
-    assertVersionAtLeast(npm.version, 10);
-    assert.ok(npm.path, "expected npm path to be reported");
-  });
+        const npm = await t.tools.npm({ minVersion: 10 });
+        assert.equal(npm.command, 'npm');
+        assertVersionAtLeast(npm.version, 10);
+        assert.ok(npm.path, 'expected npm path to be reported');
+    });
 
-  const result = await runRegisteredSuites({ repoRoot: process.cwd() });
+    const result = await runRegisteredSuites({ repoRoot: process.cwd() });
 
-  assert.equal(result.status, "passed");
+    assert.equal(result.status, 'passed');
 });
 
-test("t.tools fails clearly when a version is too old", async () => {
-  smoke.suite("tool version failure", async (t) => {
-    await t.tools.node({ minVersion: "9999.0.0" });
-  });
+test('t.tools fails clearly when a version is too old', async () => {
+    smoke.suite('tool version failure', async (t) => {
+        await t.tools.node({ minVersion: '9999.0.0' });
+    });
 
-  const result = await runRegisteredSuites({ repoRoot: process.cwd() });
+    const result = await runRegisteredSuites({ repoRoot: process.cwd() });
+    const error = result.suites[0]?.error;
 
-  assert.equal(result.status, "failed");
-  assert.equal(result.suites[0].error.name, "SmokeError");
-  assert.match(result.suites[0].error.message, /Tool node version .* is below required 9999\.0\.0/u);
-  assert.equal(result.suites[0].error.details.tool, "node");
+    assert.equal(result.status, 'failed');
+    assert.ok(error);
+    assert.equal(error.name, 'SmokeError');
+    assert.match(
+        error.message,
+        /Tool node version .* is below required 9999\.0\.0/u,
+    );
+    assert.equal(error.details?.tool, 'node');
 });
 
-function assertVersionAtLeast(version, minimumMajor) {
-  const actual = version ?? "";
-  assert.match(actual, /^\d+(?:\.\d+){0,2}$/u);
-  const major = Number.parseInt(actual.split(".")[0], 10);
-  assert.ok(
-    major >= minimumMajor,
-    `expected version ${actual} to have major >= ${minimumMajor}`,
-  );
+function assertVersionAtLeast(version: string | undefined, minimumMajor: number): void {
+    const actual = version ?? '';
+    assert.match(actual, /^\d+(?:\.\d+){0,2}$/u);
+    const [majorText] = actual.split('.');
+    assert.ok(majorText);
+    const major = Number.parseInt(majorText, 10);
+    assert.ok(
+        major >= minimumMajor,
+        `expected version ${actual} to have major >= ${String(minimumMajor)}`,
+    );
 }
