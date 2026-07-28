@@ -7,6 +7,7 @@
   },
   "include": [
     "integration/cli/**/*.ts",
-    "unit/core/**/*.ts"
+    "unit/core/**/*.ts",
+    "unit/system/**/*.ts"
   ]
 }
