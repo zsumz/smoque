@@ -37,6 +37,14 @@ smoke.suite("project smoke", async (t) => {
 });
 ```
 
+## Built In
+
+- commands, managed processes, ports, probes, files, fixtures, and safe workdirs
+- HTTP requests, TLS, fake servers, captured requests, and network policy
+- npm pack/install checks, archive assertions, snapshots, Compose, and Postgres
+- terminal, JSON, JUnit, and GitHub Actions reporting
+- tags, Markdown snippet checks, agent conventions, and custom plugins
+
 ## Commands
 
 ```sh
@@ -73,6 +81,10 @@ Use smoque for checks that sit near the edge of the project:
 - Use `t.tempDir`, `t.workDir`, and built-in helpers.
 - Includes files, ports, processes, HTTP, npm packages, archives, Compose, and Postgres.
 - Keep smoke tests shallow. Prove one important path works.
+
+## Guides
+
+[Authoring](./docs/authoring.md) · [Built-in integrations](./docs/integrations.md) · [Automation](./docs/automation.md) · [Examples](./examples)
 
 ## Notes
 
