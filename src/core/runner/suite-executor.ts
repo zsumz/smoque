@@ -1,4 +1,4 @@
-import type { RunCommandInput } from '../../command.js';
+import type { RunCommandInput } from '../../command/run-command.js';
 import { Redactor } from '../../redaction.js';
 import { createSmokeContext } from '../context/smoke-context.js';
 import type { ExtensionBucket } from '../plugin-registry.js';
@@ -8,12 +8,9 @@ import { serializeError } from './error-serialization.js';
 import { SuiteResourceTracker } from './suite-resource-tracker.js';
 import { SuiteStepRunner } from './suite-step-runner.js';
 import type { SerializedSmokeError, SmokeEvent, SmokeEventSink } from '../../events.js';
-import type {
-    PathRef,
-    SmokeContext,
-    SmokeStepResult,
-    SmokeSuite,
-} from '../../types.js';
+import type { SmokeContext } from '../../types/context.js';
+import type { PathRef } from '../../types/path-ref.js';
+import type { SmokeStepResult, SmokeSuite } from '../../types/suite.js';
 
 export class SuiteExecutor {
     public readonly context: SmokeContext;

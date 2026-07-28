@@ -1,4 +1,5 @@
-import type { Probe, SmokeContext } from '../../types.js';
+import type { SmokeContext } from '../../types/context.js';
+import type { Probe } from '../../types/probe.js';
 import type { HttpRequestOptions, HttpResponse } from './client.js';
 import type { HttpTlsOptions } from './tls.js';
 

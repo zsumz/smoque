@@ -1,5 +1,5 @@
 import { SmokeError } from '../../errors.js';
-import type { SmokeContext } from '../../types.js';
+import type { SmokeContext } from '../../types/context.js';
 import { postgresCheck } from './check.js';
 import { PsqlDatabase } from './database.js';
 import { redactUrl } from './psql.js';

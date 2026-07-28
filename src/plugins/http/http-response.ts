@@ -1,5 +1,5 @@
 import { readJsonPath } from '../../json-path.js';
-import type { ArtifactSink, SmokeResource } from '../../types.js';
+import type { ArtifactSink, SmokeResource } from '../../types/artifacts.js';
 import type {
     HttpResponse,
     JsonPathExpectation,

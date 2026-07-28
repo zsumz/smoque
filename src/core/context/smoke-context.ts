@@ -9,18 +9,13 @@ import { createProcessGroup, startProcess } from '../../process.js';
 import { createTcpApi } from '../../tcp.js';
 import { createToolDiscovery } from '../../tools.js';
 import type { SmokeEvent } from '../../events.js';
-import type {
-    CommandOptions,
-    CommandResult,
-    PathRef,
-    ProcessStartOptions,
-    RedactOptions,
-    SmokeContext,
-    SmokeResource,
-    SmokeSuite,
-    StepOptions,
-    WorkDirOptions,
-} from '../../types.js';
+import type { SmokeResource } from '../../types/artifacts.js';
+import type { CommandOptions, CommandResult } from '../../types/command.js';
+import type { RedactOptions, SmokeContext } from '../../types/context.js';
+import type { WorkDirOptions } from '../../types/filesystem.js';
+import type { PathRef } from '../../types/path-ref.js';
+import type { ProcessStartOptions } from '../../types/process.js';
+import type { SmokeSuite, StepOptions } from '../../types/suite.js';
 import type { ExtensionBucket } from '../plugin-registry.js';
 import { createArtifactSink } from './artifact-sink.js';
 import { applyPluginExtensions } from './context-extensions.js';

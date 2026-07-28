@@ -1,6 +1,6 @@
 import { parseDuration } from './duration.js';
 import { ProbeTimeoutError, SmokeError } from './errors.js';
-import type { PollOptions } from './types.js';
+import type { PollOptions } from './types/probe.js';
 
 export async function poll<T>(name: string, fn: () => Promise<T> | T, options: PollOptions = {}): Promise<T> {
     const timeoutMs = parseDuration(options.timeout, 30_000);

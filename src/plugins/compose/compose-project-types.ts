@@ -1,4 +1,5 @@
-import type { PathRef, SmokeResource } from '../../types.js';
+import type { SmokeResource } from '../../types/artifacts.js';
+import type { PathRef } from '../../types/path-ref.js';
 import type { ComposeCheckOptions } from './compose-check.js';
 import type { ComposeService } from './compose-service.js';
 

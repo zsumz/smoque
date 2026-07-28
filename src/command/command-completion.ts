@@ -1,6 +1,6 @@
 import { CommandFailedError } from '../errors.js';
 import { reservedPortsFromEnv } from '../ports.js';
-import type { CommandOptions, CommandResult } from '../types.js';
+import type { CommandOptions, CommandResult } from '../types/command.js';
 import { emitCommandFinished } from './command-events.js';
 import type { RunCommandInput } from './run-command.js';
 

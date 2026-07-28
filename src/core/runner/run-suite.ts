@@ -1,5 +1,6 @@
 import type { SerializedSmokeError, SmokeEventSink } from '../../events.js';
-import type { PathRef, SmokeSuiteResult } from '../../types.js';
+import type { PathRef } from '../../types/path-ref.js';
+import type { SmokeSuiteResult } from '../../types/suite.js';
 import { SmokeSkipSignal } from '../context/skip-signal.js';
 import type { ExtensionBucket } from '../plugin-registry.js';
 import type { RegisteredSuite } from '../registry.js';

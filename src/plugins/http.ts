@@ -1,6 +1,6 @@
 import { definePlugin } from '../plugin.js';
 import type { SmokePlugin } from '../plugin.js';
-import type { Probe } from '../types.js';
+import type { Probe } from '../types/probe.js';
 import {
     request,
     type HttpRequestOptions,

@@ -5,7 +5,9 @@ import { dirname, isAbsolute, parse, relative, resolve } from 'node:path';
 import { UnsafePathError } from './errors.js';
 import { pathToString, resolveContextPath, toPathRef } from './path-ref.js';
 import { isNotFoundError } from './shared/fs.js';
-import type { FileSystemApi, PathRef, Probe, SafeRemoveOptions, WorkDirOptions } from './types.js';
+import type { FileSystemApi, SafeRemoveOptions, WorkDirOptions } from './types/filesystem.js';
+import type { PathRef } from './types/path-ref.js';
+import type { Probe } from './types/probe.js';
 
 export function createFileSystemApi(repoRoot: PathRef): FileSystemApi {
     return {

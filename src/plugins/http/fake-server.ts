@@ -1,6 +1,6 @@
 import type { Server } from 'node:http';
 
-import type { ArtifactSink } from '../../types.js';
+import type { ArtifactSink } from '../../types/artifacts.js';
 import {
     createCapturedRequestExpectation,
     formatCapturedRequests,

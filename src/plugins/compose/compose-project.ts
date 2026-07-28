@@ -1,7 +1,8 @@
 import { isAbsolute, resolve } from 'node:path';
 
 import { pathToString } from '../../path-ref.js';
-import type { ArtifactSink, SmokeContext } from '../../types.js';
+import type { ArtifactSink } from '../../types/artifacts.js';
+import type { SmokeContext } from '../../types/context.js';
 import { composeCheck } from './compose-check.js';
 import { ComposeCommandRunner } from './compose-command-runner.js';
 import type {

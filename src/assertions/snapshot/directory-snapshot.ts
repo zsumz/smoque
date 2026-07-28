@@ -6,7 +6,8 @@ import { SmokeError } from '../../errors.js';
 import { pathToString } from '../../path-ref.js';
 import { isNotFoundError } from '../../shared/fs.js';
 import { isRecord } from '../../shared/objects.js';
-import type { ChecksumAlgorithm, PathRef } from '../../types.js';
+import type { ChecksumAlgorithm } from '../../types/checksum.js';
+import type { PathRef } from '../../types/path-ref.js';
 import type { DirectorySnapshotExpectation, DirectorySnapshotOptions } from '../types.js';
 import { diffDirectorySnapshots } from './directory-snapshot-diff.js';
 import type { DirectorySnapshot, DirectorySnapshotEntry } from './types.js';
@@ -53,10 +54,7 @@ async function createDirectorySnapshot(
     const checksum = normalizeSnapshotChecksum(options.checksum);
     const entries = await listDirectorySnapshotEntries(root, root, snapshotPath, checksum);
 
-    return {
-        schemaVersion: 'smoque.directory-snapshot.v1',
-        entries,
-    };
+    return { schemaVersion: 'smoque.directory-snapshot.v1', entries };
 }
 
 async function listDirectorySnapshotEntries(

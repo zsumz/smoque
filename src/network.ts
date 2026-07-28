@@ -1,5 +1,5 @@
 import { SmokeError } from './errors.js';
-import type { NetApi, NetworkPolicyOptions } from './types.js';
+import type { NetApi, NetworkPolicyOptions } from './types/network.js';
 
 interface NetworkPolicyState {
     external: 'allow' | 'block';

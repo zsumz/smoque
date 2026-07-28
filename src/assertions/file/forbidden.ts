@@ -1,4 +1,4 @@
-import type { ForbiddenRule } from '../../types.js';
+import type { ForbiddenRule } from '../../types/expectations.js';
 
 export const forbidden = {
     privateKeys(): ForbiddenRule {

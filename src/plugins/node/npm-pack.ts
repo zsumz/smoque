@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { SmokeError } from '../../errors.js';
 import { isRecord } from '../../shared/objects.js';
 import { toPathString } from '../../shared/path-ref.js';
-import type { SmokeContext } from '../../types.js';
+import type { SmokeContext } from '../../types/context.js';
 import type {
     NpmPackJson,
     NpmPackOptions,

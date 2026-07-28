@@ -1,4 +1,6 @@
-import type { LogApi, LogContainsOptions, Probe, ProcessHandle } from './types.js';
+import type { LogApi, LogContainsOptions } from './types/log.js';
+import type { Probe } from './types/probe.js';
+import type { ProcessHandle } from './types/process.js';
 
 export function createLogApi(write: (message: string) => Promise<void> | void): LogApi {
     const log = (async (message: string) => write(message)) as LogApi;

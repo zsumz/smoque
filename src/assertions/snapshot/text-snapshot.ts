@@ -4,7 +4,7 @@ import { dirname } from 'node:path';
 import { SmokeError } from '../../errors.js';
 import { pathToString } from '../../path-ref.js';
 import { isNotFoundError } from '../../shared/fs.js';
-import type { PathRef } from '../../types.js';
+import type { PathRef } from '../../types/path-ref.js';
 import type { TextSnapshotExpectation } from '../types.js';
 import { isSnapshotUpdateMode } from './update-mode.js';
 

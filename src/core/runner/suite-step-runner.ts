@@ -1,5 +1,5 @@
 import type { SerializedSmokeError, SmokeEvent } from '../../events.js';
-import type { SmokeStepResult, StepOptions } from '../../types.js';
+import type { SmokeStepResult, StepOptions } from '../../types/suite.js';
 import { SmokeSkipSignal } from '../context/skip-signal.js';
 
 type EventEmitter = (event: SmokeEvent) => Promise<void>;

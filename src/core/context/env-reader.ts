@@ -1,6 +1,7 @@
 import { SmokeError } from '../../errors.js';
 import { toPathRef } from '../../path-ref.js';
-import type { PathRef, SmokeContext } from '../../types.js';
+import type { SmokeContext } from '../../types/context.js';
+import type { PathRef } from '../../types/path-ref.js';
 
 export function createEnvReader(redact: (value: string) => void = () => undefined): SmokeContext['env'] {
     return {

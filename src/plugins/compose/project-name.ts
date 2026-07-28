@@ -1,7 +1,7 @@
 import { randomBytes } from 'node:crypto';
 
 import { SmokeError } from '../../errors.js';
-import type { SmokeContext } from '../../types.js';
+import type { SmokeContext } from '../../types/context.js';
 
 export function generateProjectName(t: SmokeContext): string {
     const suite = t.suite.name.toLowerCase().replace(/[^a-z0-9_-]+/gu, '-').replace(/^-+|-+$/gu, '');

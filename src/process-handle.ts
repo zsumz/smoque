@@ -4,7 +4,8 @@ import {
     forceKillProcessTreeAfter,
     terminateProcessTree,
 } from './process-tree.js';
-import type { ArtifactSink, ProcessHandle } from './types.js';
+import type { ArtifactSink } from './types/artifacts.js';
+import type { ProcessHandle } from './types/process.js';
 
 export class ManagedProcessHandle implements ProcessHandle {
     public readonly kind = 'process';

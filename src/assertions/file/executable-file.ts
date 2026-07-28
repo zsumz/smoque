@@ -7,7 +7,7 @@ import { SmokeError } from '../../errors.js';
 import { pathToString } from '../../path-ref.js';
 import { mergeEnv } from '../../shared/env.js';
 import { isNotFoundError } from '../../shared/fs.js';
-import type { ExecutableOptions } from '../../types.js';
+import type { ExecutableOptions } from '../../types/expectations.js';
 
 interface ExecutableResult {
     exitCode: number;

@@ -2,7 +2,8 @@ import { join } from 'node:path';
 
 import { SmokeError } from '../../errors.js';
 import { toPathString } from '../../shared/path-ref.js';
-import type { PathRef, SmokeContext } from '../../types.js';
+import type { SmokeContext } from '../../types/context.js';
+import type { PathRef } from '../../types/path-ref.js';
 import {
     createNpmPackageExpectation,
     type NpmPackageExpectation,

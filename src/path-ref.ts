@@ -1,6 +1,6 @@
 import { join, resolve } from 'node:path';
 
-import type { PathRef } from './types.js';
+import type { PathRef } from './types/path-ref.js';
 
 export class BasicPathRef implements PathRef {
     private readonly value: string;

@@ -3,7 +3,8 @@ import { relative } from 'node:path';
 
 import { SmokeError } from '../../errors.js';
 import { pathToString } from '../../path-ref.js';
-import type { FileSetExpectation, ForbiddenRule, PathRef } from '../../types.js';
+import type { FileSetExpectation, ForbiddenRule } from '../../types/expectations.js';
+import type { PathRef } from '../../types/path-ref.js';
 import { listMatchingFiles, normalizeFilePath } from './file-selection.js';
 import { forbidden } from './forbidden.js';
 

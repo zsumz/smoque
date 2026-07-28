@@ -4,7 +4,7 @@ import { parseDuration } from './duration.js';
 import { ProbeTimeoutError, SmokeError } from './errors.js';
 import { reservedPortsFromEnv } from './ports.js';
 import type { ManagedProcessHandle } from './process-handle.js';
-import type { ProcessStartOptions } from './types.js';
+import type { ProcessStartOptions } from './types/process.js';
 
 export async function waitForProcessSpawn(
     child: ChildProcess,

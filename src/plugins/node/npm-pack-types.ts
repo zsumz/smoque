@@ -1,4 +1,4 @@
-import type { PathRef } from '../../types.js';
+import type { PathRef } from '../../types/path-ref.js';
 
 export interface NpmPackOptions {
     cwd?: string | PathRef;

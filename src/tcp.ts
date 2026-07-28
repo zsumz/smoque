@@ -1,7 +1,8 @@
 import { Socket } from 'node:net';
 
 import { parseDuration } from './duration.js';
-import type { Probe, TcpApi, TcpReadyOptions } from './types.js';
+import type { TcpApi, TcpReadyOptions } from './types/network.js';
+import type { Probe } from './types/probe.js';
 
 export function createTcpApi(): TcpApi {
     return {

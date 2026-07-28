@@ -1,6 +1,6 @@
 import { relative, resolve } from 'node:path';
 
-import type { SmokeSuite } from '../../types.js';
+import type { SmokeSuite } from '../../types/suite.js';
 import { normalizePath } from '../path.js';
 
 export interface SuiteSelectionOptions {

@@ -1,7 +1,8 @@
 import { SmokeError } from '../../errors.js';
 import type { HttpReadyOptions } from '../http.js';
 import type { ComposePortOptions, ComposePublishedPort } from './ports.js';
-import type { Probe, SmokeContext } from '../../types.js';
+import type { SmokeContext } from '../../types/context.js';
+import type { Probe } from '../../types/probe.js';
 
 export interface ComposeService {
     readonly name: string;

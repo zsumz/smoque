@@ -1,6 +1,7 @@
 import { SmokeError } from '../errors.js';
 import type { SmokePlugin } from '../plugin.js';
-import type { SmokeContext, SuiteOptions } from '../types.js';
+import type { SmokeContext } from '../types/context.js';
+import type { SuiteOptions } from '../types/suite.js';
 import { inferCallerFile } from './context/caller-file.js';
 
 export type SuiteCallback = (t: SmokeContext) => Promise<void> | void;

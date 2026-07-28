@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { SmokeError } from '../../errors.js';
 import { isLocalHost } from '../../network.js';
 import { pathToString } from '../../path-ref.js';
-import type { PathRef } from '../../types.js';
+import type { PathRef } from '../../types/path-ref.js';
 
 export interface HttpTlsOptions {
     ca?: string | PathRef;

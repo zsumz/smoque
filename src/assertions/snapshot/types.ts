@@ -1,4 +1,4 @@
-import type { ChecksumAlgorithm } from '../../types.js';
+import type { ChecksumAlgorithm } from '../../types/checksum.js';
 
 export interface DirectorySnapshot {
     schemaVersion: 'smoque.directory-snapshot.v1';

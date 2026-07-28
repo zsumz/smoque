@@ -1,5 +1,5 @@
 import type { SerializedSmokeError, SmokeEvent } from './events.js';
-import type { RedactOptions } from './types.js';
+import type { RedactOptions } from './types/context.js';
 
 interface RedactionRule {
     pattern: string | RegExp;

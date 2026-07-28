@@ -1,7 +1,7 @@
 import { relative } from 'node:path';
 
 import { parseDuration } from '../../duration.js';
-import type { DurationString } from '../../types.js';
+import type { DurationString } from '../../types/duration.js';
 import { parseSnippetOptions } from '../args/options.js';
 import { discoverMarkdownFiles } from '../discovery/markdown-files.js';
 import { normalizePath } from '../path.js';

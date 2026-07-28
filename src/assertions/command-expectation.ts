@@ -1,4 +1,4 @@
-import type { CommandResult } from '../types.js';
+import type { CommandResult } from '../types/command.js';
 import type { CommandExpectation, JsonPathExpectation } from './types.js';
 import { createJsonPathExpectation, parseStructuredJson } from './json-path-expectation.js';
 

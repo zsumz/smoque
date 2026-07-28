@@ -1,11 +1,11 @@
 import { SmokeError } from '../../errors.js';
-import { setSnapshotUpdateMode } from '../../expectations.js';
+import { setSnapshotUpdateMode } from '../../assertions/snapshot/update-mode.js';
 import { toPathRef } from '../../path-ref.js';
 import type { SmokeRegistry } from '../registry.js';
 import { emitSmokeEvent } from './events.js';
 import { runSuite } from './run-suite.js';
 import { filterSuites, type SuiteFilterOptions } from './suite-filter.js';
-import type { SmokeRunOptions, SmokeRunResult, SmokeSuiteResult } from '../../types.js';
+import type { SmokeRunOptions, SmokeRunResult, SmokeSuiteResult } from '../../types/suite.js';
 
 export async function runRegisteredSuitesForRegistry(
     registry: SmokeRegistry,

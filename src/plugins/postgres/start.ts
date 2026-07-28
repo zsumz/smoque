@@ -1,5 +1,7 @@
 import { SmokeError } from '../../errors.js';
-import type { DurationString, PollOptions, SmokeContext } from '../../types.js';
+import type { SmokeContext } from '../../types/context.js';
+import type { DurationString } from '../../types/duration.js';
+import type { PollOptions } from '../../types/probe.js';
 import type { ComposeUpOptions } from '../compose.js';
 import { composeFileContents } from './compose-file.js';
 import { postgresConnect } from './connect.js';

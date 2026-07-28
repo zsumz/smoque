@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 
 import type { ArtifactAttachedEvent, SmokeEvent } from '../../events.js';
 import { toPathRef } from '../../path-ref.js';
-import type { ArtifactSink } from '../../types.js';
+import type { ArtifactSink } from '../../types/artifacts.js';
 
 export interface ArtifactSinkOptions {
     suiteId: string;

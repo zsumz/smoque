@@ -1,6 +1,7 @@
 import { SmokeError } from '../errors.js';
 import type { ActionFactory, PluginRegistry, ProbeFactory, RecipeFactory, ResourceFactory } from '../plugin.js';
-import type { Probe, SmokeResource } from '../types.js';
+import type { SmokeResource } from '../types/artifacts.js';
+import type { Probe } from '../types/probe.js';
 
 export interface ExtensionBucket {
     resources: Map<string, ResourceFactory<SmokeResource>>;

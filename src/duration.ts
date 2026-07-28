@@ -1,5 +1,5 @@
 import { SmokeError } from './errors.js';
-import type { DurationString } from './types.js';
+import type { DurationString } from './types/duration.js';
 
 export function parseDuration(value: DurationString | undefined, fallbackMs: number): number {
     if (!value) {

@@ -7,11 +7,8 @@ import { findDependencyCycles } from './dependency/find-dependency-cycles.mts';
 import { createRuntimeDependencyGraph } from './dependency/runtime-dependency-graph.mts';
 import {
     collectModuleFiles,
-    relativePath,
 } from './module/module-files.mts';
-import {
-    inspectModuleLayout,
-} from './module/module-layout.mts';
+import { checkModule } from './module/check-module.mts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const sourceRoot = path.join(root, 'src');
@@ -36,8 +33,7 @@ const inspectedFiles = (
     await Promise.all(inspectedRoots.map(collectModuleFiles))
 ).flat();
 for (const file of inspectedFiles) {
-    const source = await readFile(file, 'utf8');
-    failures.push(...inspectModuleLayout(relativePath(root, file), countLines(source)));
+    failures.push(...await checkModule(root, sourceRoot, file));
 }
 const sourceFiles = await collectModuleFiles(sourceRoot);
 const graph = await createRuntimeDependencyGraph(root, sourceRoot, sourceFiles);
@@ -64,8 +60,4 @@ function hasRuntimeDependencies(value: unknown): boolean {
         && typeof value.dependencies === 'object'
         && value.dependencies !== null
         && Object.keys(value.dependencies).length > 0;
-}
-
-function countLines(source: string): number {
-    return source === '' ? 0 : source.split(/\r?\n/u).length - (source.endsWith('\n') ? 1 : 0);
 }

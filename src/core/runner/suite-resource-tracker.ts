@@ -1,5 +1,5 @@
 import type { SerializedSmokeError } from '../../events.js';
-import type { ArtifactSink, SmokeResource } from '../../types.js';
+import type { ArtifactSink, SmokeResource } from '../../types/artifacts.js';
 
 type ErrorSerializer = (error: unknown) => SerializedSmokeError;
 

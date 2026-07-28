@@ -1,5 +1,6 @@
 import { pathToString } from '../../path-ref.js';
-import type { CommandOptions, SmokeContext } from '../../types.js';
+import type { CommandOptions } from '../../types/command.js';
+import type { SmokeContext } from '../../types/context.js';
 import type { PostgresCheckOptions, PostgresParamValue, PostgresSqlOptions } from './types.js';
 
 export function basePsqlArgs(url: string, options: PostgresSqlOptions): string[] {

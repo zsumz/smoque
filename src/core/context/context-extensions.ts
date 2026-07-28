@@ -1,5 +1,6 @@
 import { SmokeError } from '../../errors.js';
-import type { SmokeContext, SmokeResource } from '../../types.js';
+import type { SmokeResource } from '../../types/artifacts.js';
+import type { SmokeContext } from '../../types/context.js';
 import type { SmokeContextHost } from './smoke-context.js';
 
 export function applyPluginExtensions(

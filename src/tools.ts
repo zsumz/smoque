@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 
 import { SmokeError } from './errors.js';
-import type { ToolDiscovery, ToolRef, ToolVersionOptions } from './types.js';
+import type { ToolDiscovery, ToolRef, ToolVersionOptions } from './types/tools.js';
 
 interface ToolSpec {
     name: string;

@@ -1,6 +1,6 @@
-import { runCommand, type RunCommandInput } from '../../command.js';
+import { runCommand, type RunCommandInput } from '../../command/run-command.js';
 import type { SmokeEventSink } from '../../events.js';
-import type { PathRef } from '../../types.js';
+import type { PathRef } from '../../types/path-ref.js';
 
 export async function runContextCommand(
     command: string,

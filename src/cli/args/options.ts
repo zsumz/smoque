@@ -1,4 +1,4 @@
-import type { DurationString } from '../../types.js';
+import type { DurationString } from '../../types/duration.js';
 
 export interface RunCliOptions {
     pattern?: string;

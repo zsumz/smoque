@@ -2,7 +2,7 @@ import { writeFile } from 'node:fs/promises';
 
 import type { SmokeEvent, SmokeEventSink } from '../events.js';
 import { pathToString } from '../path-ref.js';
-import type { PathRef } from '../types.js';
+import type { PathRef } from '../types/path-ref.js';
 import { EventReportBuilder } from './event-report-builder.js';
 import { renderJUnitReport } from './junit-xml.js';
 

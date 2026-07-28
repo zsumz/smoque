@@ -1,10 +1,7 @@
 import { SmokeError } from '../../errors.js';
-import type {
-    CommandOptions,
-    CommandResult,
-    DurationString,
-    SmokeContext,
-} from '../../types.js';
+import type { CommandOptions, CommandResult } from '../../types/command.js';
+import type { SmokeContext } from '../../types/context.js';
+import type { DurationString } from '../../types/duration.js';
 import type { ComposeCommandRecord } from './errors.js';
 
 export class ComposeCommandRunner {

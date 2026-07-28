@@ -5,7 +5,8 @@ import { shouldUseProcessGroup, terminateProcessTree } from '../process-tree.js'
 import { mergeEnv } from '../shared/env.js';
 import { toPathString } from '../shared/path-ref.js';
 import type { SmokeEventSink } from '../events.js';
-import type { CommandOptions, CommandResult, PathRef } from '../types.js';
+import type { CommandOptions, CommandResult } from '../types/command.js';
+import type { PathRef } from '../types/path-ref.js';
 import { finishCommand } from './command-completion.js';
 import { emitCommandOutput, emitCommandStarted } from './command-events.js';
 

@@ -9,12 +9,8 @@ import {
 } from './process-readiness.js';
 import { shouldUseProcessGroup } from './process-tree.js';
 import { mergeEnv } from './shared/env.js';
-import type {
-    PathRef,
-    ProcessGroup,
-    ProcessHandle,
-    ProcessStartOptions,
-} from './types.js';
+import type { PathRef } from './types/path-ref.js';
+import type { ProcessGroup, ProcessHandle, ProcessStartOptions } from './types/process.js';
 
 export interface StartProcessInput {
     command: string;

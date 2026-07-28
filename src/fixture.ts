@@ -3,7 +3,9 @@ import { basename, dirname, join } from 'node:path';
 
 import { SmokeError } from './errors.js';
 import { resolveContextPath, toPathRef } from './path-ref.js';
-import type { FixtureApi, FixtureTemplateOptions, PathRef, SmokeContext } from './types.js';
+import type { SmokeContext } from './types/context.js';
+import type { FixtureApi, FixtureTemplateOptions } from './types/fixture.js';
+import type { PathRef } from './types/path-ref.js';
 
 type FixtureContext = Pick<SmokeContext, 'repoRoot' | 'tempDir'>;
 

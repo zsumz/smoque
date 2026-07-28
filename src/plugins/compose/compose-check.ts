@@ -1,6 +1,9 @@
 import { SmokeError } from '../../errors.js';
 import { pathToString } from '../../path-ref.js';
-import type { CommandOptions, DurationString, PathRef, SmokeContext } from '../../types.js';
+import type { CommandOptions } from '../../types/command.js';
+import type { SmokeContext } from '../../types/context.js';
+import type { DurationString } from '../../types/duration.js';
+import type { PathRef } from '../../types/path-ref.js';
 
 export interface ComposeCheckOptions {
     docker?: string;

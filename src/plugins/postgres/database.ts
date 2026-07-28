@@ -1,5 +1,6 @@
 import { SmokeError } from '../../errors.js';
-import type { CommandResult, SmokeContext } from '../../types.js';
+import type { CommandResult } from '../../types/command.js';
+import type { SmokeContext } from '../../types/context.js';
 import { parseCsv } from './csv.js';
 import { postgresQueryError, postgresSqlError } from './errors.js';
 import { basePsqlArgs, commandOptionsFrom, mergeSqlOptions, stripTrailingSemicolon } from './psql.js';

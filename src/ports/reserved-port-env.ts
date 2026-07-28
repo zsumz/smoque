@@ -1,4 +1,4 @@
-import type { PortEnvValue, ReservedPort } from '../types.js';
+import type { PortEnvValue, ReservedPort } from '../types/ports.js';
 
 const reservedPortsSymbol = Symbol.for('smoque.reservedPorts');
 

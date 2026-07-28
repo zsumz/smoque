@@ -1,6 +1,6 @@
 import { SmokeError } from '../errors.js';
 import type { SmokePlugin } from '../plugin.js';
-import type { SmokeSuite, SuiteOptions } from '../types.js';
+import type { SmokeSuite, SuiteOptions } from '../types/suite.js';
 import {
     clearExtensionBucket,
     cloneExtensionBucket,

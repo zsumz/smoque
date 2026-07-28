@@ -1,4 +1,7 @@
-import type { CommandResult, DurationString, PathRef, SmokeResource } from '../../types.js';
+import type { SmokeResource } from '../../types/artifacts.js';
+import type { CommandResult } from '../../types/command.js';
+import type { DurationString } from '../../types/duration.js';
+import type { PathRef } from '../../types/path-ref.js';
 
 export interface PostgresCheckOptions {
     psql?: string;

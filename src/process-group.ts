@@ -1,12 +1,12 @@
 import { SmokeError } from './errors.js';
+import type { ArtifactSink } from './types/artifacts.js';
+import type { PathRef } from './types/path-ref.js';
 import type {
-    ArtifactSink,
-    PathRef,
     ProcessGroup,
     ProcessGroupStartOptions,
     ProcessHandle,
     ProcessStartOptions,
-} from './types.js';
+} from './types/process.js';
 
 interface ProcessStarterInput {
     command: string;

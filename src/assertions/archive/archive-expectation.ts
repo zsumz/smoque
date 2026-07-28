@@ -4,7 +4,7 @@ import { gunzipSync } from 'node:zlib';
 
 import { SmokeError } from '../../errors.js';
 import { pathToString } from '../../path-ref.js';
-import type { PathRef } from '../../types.js';
+import type { PathRef } from '../../types/path-ref.js';
 import type { ArchiveExpectation } from '../types.js';
 import { listTarEntries } from './tar.js';
 import { isZipArchive, listZipEntries } from './zip.js';

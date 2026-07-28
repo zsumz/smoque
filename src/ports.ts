@@ -6,7 +6,7 @@ import {
     isReservedPort,
     type ReservedPortDetails,
 } from './ports/reserved-port-env.js';
-import type { PortReserveOptions, PortsApi, ReservedPort } from './types.js';
+import type { PortReserveOptions, PortsApi, ReservedPort } from './types/ports.js';
 
 export { reservedPortsFromEnv } from './ports/reserved-port-env.js';
 

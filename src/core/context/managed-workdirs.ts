@@ -1,5 +1,6 @@
 import { createFileSystemApi, createTempDir, createWorkDir } from '../../filesystem.js';
-import type { PathRef, WorkDirOptions } from '../../types.js';
+import type { WorkDirOptions } from '../../types/filesystem.js';
+import type { PathRef } from '../../types/path-ref.js';
 import type { SmokeContextHost } from './smoke-context.js';
 
 export async function createManagedTempDir(

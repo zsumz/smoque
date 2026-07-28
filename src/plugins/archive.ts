@@ -1,7 +1,7 @@
-import { listArchiveEntries } from '../expectations.js';
+import { listArchiveEntries } from '../assertions/archive/archive-expectation.js';
 import { definePlugin } from '../plugin.js';
 import type { SmokePlugin } from '../plugin.js';
-import type { PathRef } from '../types.js';
+import type { PathRef } from '../types/path-ref.js';
 
 export interface ArchiveApi {
     list(path: string | PathRef): Promise<string[]>;

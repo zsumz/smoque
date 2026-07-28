@@ -1,10 +1,7 @@
-import type {
-    ChecksumAlgorithm,
-    CommandResult,
-    ExecutableOptions,
-    FileSetExpectation,
-    PathRef,
-} from '../types.js';
+import type { ChecksumAlgorithm } from '../types/checksum.js';
+import type { CommandResult } from '../types/command.js';
+import type { ExecutableOptions, FileSetExpectation } from '../types/expectations.js';
+import type { PathRef } from '../types/path-ref.js';
 
 export interface SmokeExpectApi {
     <T>(value: T): ValueExpectation<T>;

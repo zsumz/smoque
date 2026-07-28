@@ -1,5 +1,5 @@
 import { assertNetworkAllowed } from '../../network.js';
-import type { SmokeContext } from '../../types.js';
+import type { SmokeContext } from '../../types/context.js';
 import type { HttpRequestOptions, HttpResponse } from './client-types.js';
 import { executeHttpRequest, parseHttpDuration } from './client-transport.js';
 import { createHttpResponse } from './http-response.js';
