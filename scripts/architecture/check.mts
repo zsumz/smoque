@@ -15,10 +15,12 @@ import { checkModule } from './module/check-module.mts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const sourceRoot = path.join(root, 'src');
 const scriptsRoot = path.join(root, 'scripts');
+const smokeRoot = path.join(root, 'smoke');
 const inspectedRoots = [
     sourceRoot,
     path.join(root, 'test'),
     scriptsRoot,
+    smokeRoot,
 ];
 const failures: string[] = [];
 
@@ -42,6 +44,7 @@ const sourceFiles = await collectModuleFiles(sourceRoot);
 const javascriptModules = [
     ...await collectJavaScriptModuleFiles(sourceRoot),
     ...await collectJavaScriptModuleFiles(scriptsRoot),
+    ...await collectJavaScriptModuleFiles(smokeRoot),
 ];
 for (const file of javascriptModules) {
     failures.push(
