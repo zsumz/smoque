@@ -60,7 +60,7 @@
     "test": "npm run build && npm run typecheck:tests && vitest run",
     "coverage": "npm run build && vitest run --coverage",
     "coverage:check": "npm run build && SMOQUE_COVERAGE_CHECK=1 vitest run --coverage",
-    "lint": "eslint src scripts/architecture test/architecture test/integration/cli test/unit/core/caller-file.test.ts test/unit/core/env-reader.test.ts test/unit/core/json-path.test.ts test/unit/core/poll.test.ts test/unit/core/with-environment.ts",
+    "lint": "eslint src scripts/architecture test/architecture test/integration/cli test/unit/core",
     "archive:source": "git archive --format=tar.gz --output smoque-source.tgz HEAD",
     "bin:local": "npm run build && node scripts/build-local-bin.mjs",
     "prepack": "npm run build",
