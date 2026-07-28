@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { test } from 'vitest';
 
 import { expect } from '../../../dist/core.js';
-import type { CommandResult } from '../../../dist/types.js';
+import type { CommandResult } from '../../../dist/types/command.js';
 import { assertDetailedExpectationError } from './detailed-expectation-error.js';
 
 test('expect.command and expect.file assert structured JSON paths', async () => {

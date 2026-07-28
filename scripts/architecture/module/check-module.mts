@@ -8,6 +8,7 @@ import {
 } from './source-facades.mts';
 import { inspectSourceImports } from './source-import-boundaries.mts';
 import { inspectSourceSafety } from './source-safety.mts';
+import { inspectTestImports } from './test-import-boundaries.mts';
 
 export async function checkModule(
     root: string,
@@ -17,7 +18,7 @@ export async function checkModule(
     const source = await readFile(file, 'utf8');
     const relative = relativePath(root, file);
     const failures = inspectModuleLayout(relative, countLines(source));
-    if (!relative.startsWith('src/')) {
+    if (!relative.startsWith('src/') && !relative.startsWith('test/')) {
         return failures;
     }
 
@@ -28,6 +29,10 @@ export async function checkModule(
         true,
         ts.ScriptKind.TS,
     );
+    if (relative.startsWith('test/')) {
+        failures.push(...inspectTestImports(root, file, sourceFile));
+        return failures;
+    }
     if (sourceFacades.has(relative) && !isPureReExportFacade(sourceFile)) {
         failures.push(`${relative}: facade modules must contain only re-exports.`);
     }

@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { beforeEach, test } from 'vitest';
 
 import { resetSmokeRegistry, runRegisteredSuites, smoke } from '../../../../dist/core.js';
-import type { ReservedPort } from '../../../../dist/types.js';
+import type { ReservedPort } from '../../../../dist/types/ports.js';
 
 beforeEach(() => {
     resetSmokeRegistry();

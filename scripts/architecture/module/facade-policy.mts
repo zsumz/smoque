@@ -23,3 +23,12 @@ export function facadeImportFailure(
     return `${source}:${String(line)}:${String(column)} implementation modules must import `
         + `the concrete owner behind ${target}.`;
 }
+
+export function testFacadeImportFailure(
+    target: string,
+): string | undefined {
+    if (!sourceFacades.has(target)) {
+        return undefined;
+    }
+    return `tests must import the public entrypoint or concrete owner behind ${target}.`;
+}

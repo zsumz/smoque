@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'vitest';
 
 import { resetSmokeRegistry, runRegisteredSuites, smoke } from '../../../../dist/core.js';
-import type { SmokeRunResult } from '../../../../dist/types.js';
+import type { SmokeRunResult } from '../../../../dist/types/suite.js';
 import type { CapturedRequestExpectation } from '../../../../dist/plugins/http.js';
 import httpPlugin from '../../../../dist/plugins/http.js';
 

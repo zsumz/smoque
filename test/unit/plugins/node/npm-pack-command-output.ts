@@ -1,8 +1,8 @@
 import type {
     CommandOptions,
     CommandResult,
-    SmokeContext,
-} from '../../../../dist/types.js';
+} from '../../../../dist/types/command.js';
+import type { SmokeContext } from '../../../../dist/types/context.js';
 
 export function withPackCommandOutput(
     context: SmokeContext,
