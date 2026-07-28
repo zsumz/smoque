@@ -28,6 +28,13 @@ export function inspectSourceSafety(
         if (ts.isNonNullExpression(node)) {
             report(node, 'non-null-assertion');
         }
+        if (
+            ts.isAsExpression(node)
+            && ts.isAsExpression(node.expression)
+            && node.expression.type.kind === ts.SyntaxKind.UnknownKeyword
+        ) {
+            report(node, 'unknown-double-assertion');
+        }
         ts.forEachChild(node, visit);
     }
 

@@ -16,6 +16,10 @@ test('unsafe TypeScript escape hatches have explicit failures', () => {
         sourceSafetyMessage('non-null-assertion'),
         'non-null assertions are forbidden in production source.',
     );
+    assert.equal(
+        sourceSafetyMessage('unknown-double-assertion'),
+        'double assertions through unknown are forbidden in production source.',
+    );
 });
 
 test('production JavaScript module extensions are recognized', () => {

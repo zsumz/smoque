@@ -4,12 +4,15 @@ import type { SmokeContext } from '../../types/context.js';
 import type { SmokeContextHost } from './smoke-context.js';
 
 export function applyPluginExtensions(
-    context: SmokeContext,
+    context: object,
     host: SmokeContextHost,
-): void {
+): asserts context is SmokeContext {
+    // Extension names are runtime data. Registry validation guarantees their
+    // shape; this is the single boundary that promotes the assembled context.
+    const smokeContext = context as SmokeContext;
     for (const [name, factory] of host.extensions.actions) {
-        assignDotted(context, name, async (...args: unknown[]) => {
-            const value = await factory(context, ...args);
+        assignDotted(smokeContext, name, async (...args: unknown[]) => {
+            const value = await factory(smokeContext, ...args);
             if (isSmokeResource(value)) {
                 host.addManagedResource(value);
             }
@@ -18,14 +21,14 @@ export function applyPluginExtensions(
     }
     for (const [name, factory] of host.extensions.probes) {
         assignDotted(
-            context,
+            smokeContext,
             name,
-            (...args: unknown[]) => factory(context, args.length <= 1 ? args[0] : args),
+            (...args: unknown[]) => factory(smokeContext, args.length <= 1 ? args[0] : args),
         );
     }
     for (const [name, factory] of host.extensions.resources) {
-        assignDotted(context, name, async (...args: unknown[]) => {
-            const resource = await factory(context, args.length <= 1 ? args[0] : args);
+        assignDotted(smokeContext, name, async (...args: unknown[]) => {
+            const resource = await factory(smokeContext, args.length <= 1 ? args[0] : args);
             if (isSmokeResource(resource)) {
                 host.addManagedResource(resource);
             }
@@ -33,7 +36,7 @@ export function applyPluginExtensions(
         });
     }
     for (const [name, factory] of host.extensions.recipes) {
-        assignDotted(context, name, (options: unknown) => factory(context, options));
+        assignDotted(smokeContext, name, (options: unknown) => factory(smokeContext, options));
     }
 }
 

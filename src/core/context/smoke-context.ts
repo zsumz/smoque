@@ -18,6 +18,11 @@ import type { ProcessStartOptions } from '../../types/process.js';
 import type { SmokeSuite, StepOptions } from '../../types/suite.js';
 import type { ExtensionBucket } from '../plugin-registry.js';
 import { createArtifactSink } from './artifact-sink.js';
+import {
+    assertContextAssemblyComplete,
+    deferredContextValue,
+    type SmokeContextAssembly,
+} from './context-assembly.js';
 import { applyPluginExtensions } from './context-extensions.js';
 import { createEnvReader } from './env-reader.js';
 import { createManagedTempDir, createManagedWorkDir } from './managed-workdirs.js';
@@ -73,7 +78,7 @@ export function createSmokeContext(host: SmokeContextHost): SmokeContext {
         tempDir: async (name?: string) => createManagedTempDir(host, name),
         workDir: async (path: string, options: WorkDirOptions = {}) =>
             createManagedWorkDir(host, path, options),
-        fixture: undefined,
+        fixture: deferredContextValue<SmokeContext['fixture']>(undefined),
         fs: createFileSystemApi(host.root),
         env: createEnvReader((value) => {
             host.addRedaction(value);
@@ -82,7 +87,7 @@ export function createSmokeContext(host: SmokeContextHost): SmokeContext {
             host.addCleanup(fn);
         }),
         tools: createToolDiscovery(),
-        net: undefined,
+        net: deferredContextValue<SmokeContext['net']>(undefined),
         tcp: createTcpApi(),
         process: {
             start: async (command: string, args: string[] = [], options: ProcessStartOptions = {}) => {
@@ -126,10 +131,11 @@ export function createSmokeContext(host: SmokeContextHost): SmokeContext {
             }
             return host.emit(event);
         }),
-    } as unknown as SmokeContext;
+    } satisfies SmokeContextAssembly;
     context.net = createNetApi(context);
     context.fixture = createFixtureApi(context);
 
+    assertContextAssemblyComplete(context);
     applyPluginExtensions(context, host);
     return context;
 }
