@@ -1,15 +1,14 @@
 import { createServer } from 'node:net';
 
 import { SmokeError } from './errors.js';
-import type { PortEnvValue, PortReserveOptions, PortsApi, ReservedPort } from './types.js';
+import {
+    attachReservedPortDetails,
+    isReservedPort,
+    type ReservedPortDetails,
+} from './ports/reserved-port-env.js';
+import type { PortReserveOptions, PortsApi, ReservedPort } from './types.js';
 
-const reservedPortsSymbol = Symbol.for('smoque.reservedPorts');
-
-interface ReservedPortDetails {
-    host: string;
-    port: number;
-    env?: string;
-}
+export { reservedPortsFromEnv } from './ports/reserved-port-env.js';
 
 export function createPortsApi(registerCleanup: (fn: () => Promise<void> | void) => void): PortsApi {
     const usedPorts: Set<number> = new Set();
@@ -59,24 +58,11 @@ export function createPortsApi(registerCleanup: (fn: () => Promise<void> | void)
                 }
             }
 
-            Object.defineProperty(env, reservedPortsSymbol, {
-                enumerable: false,
-                value: details,
-            });
+            attachReservedPortDetails(env, details);
 
             return env;
         },
     };
-}
-
-export function reservedPortsFromEnv(
-    env: Record<string, string | undefined> | undefined,
-): Record<string, ReservedPortDetails> | undefined {
-    const value = (env as Record<symbol, unknown> | undefined)?.[reservedPortsSymbol];
-    if (isReservedPortDetailsMap(value)) {
-        return value;
-    }
-    return undefined;
 }
 
 function createReservedPort(name: string, host: string, port: number): ReservedPort {
@@ -129,30 +115,4 @@ async function listenOnEphemeralPort(host: string): Promise<number> {
     });
 
     return address.port;
-}
-
-function isReservedPort(value: PortEnvValue): value is ReservedPort {
-    return typeof value === 'object'
-    && value !== null
-    && 'name' in value
-    && 'host' in value
-    && 'port' in value
-    && typeof value.name === 'string'
-    && typeof value.host === 'string'
-    && typeof value.port === 'number';
-}
-
-function isReservedPortDetailsMap(value: unknown): value is Record<string, ReservedPortDetails> {
-    if (typeof value !== 'object' || value === null) {
-        return false;
-    }
-
-    return Object.values(value as Record<string, unknown>).every((entry) =>
-        typeof entry === 'object'
-    && entry !== null
-    && 'host' in entry
-    && 'port' in entry
-    && typeof entry.host === 'string'
-    && typeof entry.port === 'number',
-    );
 }

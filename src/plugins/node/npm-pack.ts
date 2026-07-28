@@ -4,22 +4,14 @@ import { resolve } from 'node:path';
 import { SmokeError } from '../../errors.js';
 import { isRecord } from '../../shared/objects.js';
 import { toPathString } from '../../shared/path-ref.js';
-import type { PathRef, SmokeContext } from '../../types.js';
+import type { SmokeContext } from '../../types.js';
+import type {
+    NpmPackJson,
+    NpmPackOptions,
+    PackedArtifact,
+} from './npm-pack-types.js';
 
-export interface NpmPackOptions {
-    cwd?: string | PathRef;
-    destination?: string | PathRef;
-    cache?: string | PathRef;
-    scripts?: 'allow' | 'ignore';
-    ignoreScripts?: boolean;
-}
-
-export interface PackedArtifact {
-    filename: string;
-    path: string;
-    packageName?: string;
-    version?: string;
-}
+export type { NpmPackOptions, PackedArtifact } from './npm-pack-types.js';
 
 export async function npmPack(
     t: SmokeContext,
@@ -93,12 +85,6 @@ function packScriptPolicy(options: NpmPackOptions): 'allow' | 'ignore' {
     }
 
     return options.ignoreScripts === true ? 'ignore' : 'allow';
-}
-
-interface NpmPackJson {
-    filename: string;
-    name?: string;
-    version?: string;
 }
 
 function parsePackResult(stdout: string, stderr: string): NpmPackJson {

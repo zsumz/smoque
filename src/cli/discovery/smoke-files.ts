@@ -1,9 +1,9 @@
 import { readdir, realpath } from 'node:fs/promises';
-import { registerHooks } from 'node:module';
 import { relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { normalizePath } from '../path.js';
+import { registerBundledRuntimeResolver } from './bundled-runtime-resolver.js';
 
 const ignoredDiscoveryDirectories = new Set([
     '.git',
@@ -15,8 +15,6 @@ const ignoredDiscoveryDirectories = new Set([
     'node_modules',
     'target',
 ]);
-
-let bundledRuntimeResolverRegistered = false;
 
 export async function discoverSmokeFiles(repoRoot: string, pattern?: string): Promise<string[]> {
     const files = await listSmokeFiles(repoRoot);
@@ -65,35 +63,6 @@ export async function importSmokeFiles(files: string[]): Promise<void> {
     for (const file of files) {
         await import(pathToFileURL(file).href);
     }
-}
-
-function registerBundledRuntimeResolver(): void {
-    if (bundledRuntimeResolverRegistered) {
-        return;
-    }
-
-    const runtimeUrls = new Map([
-        ['smoque', new URL('../../index.js', import.meta.url).href],
-        ['smoque/plugin', new URL('../../plugin.js', import.meta.url).href],
-    ]);
-
-    registerHooks({
-        resolve(specifier, context, nextResolve) {
-            const runtimeUrl = runtimeUrls.get(specifier);
-            if (runtimeUrl) {
-                return { url: runtimeUrl, shortCircuit: true };
-            }
-
-            const result = nextResolve(specifier, context);
-            if (result.url.endsWith('.smoke.ts')) {
-                return { ...result, format: 'module-typescript' };
-            }
-
-            return result;
-        },
-    });
-
-    bundledRuntimeResolverRegistered = true;
 }
 
 async function listSmokeFiles(root: string): Promise<string[]> {

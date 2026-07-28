@@ -1,15 +1,11 @@
 import { SmokeError } from '../../errors.js';
 import { setSnapshotUpdateMode } from '../../expectations.js';
 import { toPathRef } from '../../path-ref.js';
-import { SmokeSkipSignal } from '../context/skip-signal.js';
-import type { ExtensionBucket } from '../plugin-registry.js';
-import type { RegisteredSuite, SmokeRegistry } from '../registry.js';
+import type { SmokeRegistry } from '../registry.js';
 import { emitSmokeEvent } from './events.js';
-import { serializeError } from './error-serialization.js';
-import { SuiteExecutor } from './suite-executor.js';
+import { runSuite } from './run-suite.js';
 import { filterSuites, type SuiteFilterOptions } from './suite-filter.js';
-import type { SerializedSmokeError, SmokeEventSink } from '../../events.js';
-import type { PathRef, SmokeRunOptions, SmokeRunResult, SmokeSuiteResult } from '../../types.js';
+import type { SmokeRunOptions, SmokeRunResult, SmokeSuiteResult } from '../../types.js';
 
 export async function runRegisteredSuitesForRegistry(
     registry: SmokeRegistry,
@@ -87,76 +83,4 @@ export async function runRegisteredSuitesForRegistry(
     } finally {
         setSnapshotUpdateMode(false);
     }
-}
-
-async function runSuite(
-    definition: RegisteredSuite,
-    repoRoot: PathRef,
-    extensions: ExtensionBucket,
-    keepWorkdirOnFail: boolean,
-    eventSink: SmokeEventSink | undefined,
-): Promise<SmokeSuiteResult> {
-    const startedAt = Date.now();
-
-    await emitSmokeEvent(eventSink, {
-        type: 'suite.started',
-        suiteId: definition.suite.id,
-        name: definition.suite.name,
-    });
-
-    let primaryError: SerializedSmokeError | undefined;
-    let skipped = false;
-    let executor: SuiteExecutor | undefined;
-
-    try {
-        executor = new SuiteExecutor(definition.suite, repoRoot, extensions, keepWorkdirOnFail, eventSink);
-
-        if (definition.options.skip) {
-            skipped = true;
-        } else {
-            await definition.fn(executor.context);
-        }
-    } catch (error) {
-        if (error instanceof SmokeSkipSignal) {
-            skipped = true;
-        } else {
-            primaryError = executor ? executor.serializeError(error) : serializeError(error);
-        }
-    }
-
-    const continuedFailure = executor?.firstContinuedFailure;
-    if (executor) {
-        executor.preserveManagedWorkdirs = primaryError !== undefined || continuedFailure !== undefined;
-    }
-    const attachErrors = executor && (primaryError || continuedFailure) ? await executor.attachResourcesOnFailure() : [];
-    const cleanupErrors = executor ? [...attachErrors, ...await executor.runCleanup()] : [];
-    const durationMs = Date.now() - startedAt;
-    const status =
-        primaryError || continuedFailure || cleanupErrors.length > 0
-            ? 'failed'
-            : skipped
-                ? 'skipped'
-                : 'passed';
-
-    await emitSmokeEvent(eventSink, {
-        type: 'suite.finished',
-        suiteId: definition.suite.id,
-        status,
-        durationMs,
-    });
-
-    const result: SmokeSuiteResult = {
-        suite: definition.suite,
-        status,
-        steps: executor?.steps ?? [],
-        durationMs,
-        cleanupErrors,
-    };
-
-    const error = primaryError ?? continuedFailure;
-    if (error) {
-        result.error = error;
-    }
-
-    return result;
 }
