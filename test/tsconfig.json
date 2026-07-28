@@ -9,6 +9,7 @@
     "integration/cli/**/*.ts",
     "unit/assertions/**/*.ts",
     "unit/core/**/*.ts",
+    "unit/reporting/**/*.ts",
     "unit/runtime/**/*.ts",
     "unit/system/**/*.ts"
   ]
