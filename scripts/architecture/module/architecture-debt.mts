@@ -1,5 +1,4 @@
 export const legacyLineLimits: ReadonlyMap<string, number> = new Map([
-    ['src/assertions/file/file-expectation.ts', 211],
     ['src/assertions/file/file-set-expectation.ts', 191],
     ['src/cli/commands/doctor.ts', 185],
     ['src/command/run-command.ts', 223],
