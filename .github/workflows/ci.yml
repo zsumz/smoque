@@ -14,19 +14,29 @@ permissions:
 
 jobs:
   validate:
-    name: Validate Node ${{ matrix.node-label }}
-    runs-on: ubuntu-latest
+    name: Validate ${{ matrix.platform }} / Node ${{ matrix.node-label }}
+    runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
         include:
-          - node-label: 22.x
+          - platform: Linux
+            os: ubuntu-latest
+            node-label: 22.x
             node-version: 22.18.0
-          - node-label: 24.x
+          - platform: Linux
+            os: ubuntu-latest
+            node-label: 24.x
             node-version: 24.x
-          - node-label: 26.x
+          - platform: Linux
+            os: ubuntu-latest
+            node-label: 26.x
             node-version: 26.x
+          - platform: macOS
+            os: macos-latest
+            node-label: 22.x
+            node-version: 22.18.0
 
     steps:
       - name: Check out repo
@@ -49,6 +59,33 @@ jobs:
 
       - name: Validate package
         run: npm run validate
+
+  windows-build:
+    name: Windows build contract (experimental)
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.18.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check source and package build
+        run: |
+          npm run typecheck
+          npm run typecheck:tests
+          npm run lint
+          npm run architecture:check
+          npm run build
+          node dist/cli/main.js --version
+          npm pack --dry-run --json
 
   coverage:
     name: Coverage gate

@@ -89,3 +89,5 @@ Use smoque for checks that sit near the edge of the project:
 ## Notes
 
 Requires Node `22.18.0` or newer.
+
+Linux and macOS are validated in CI. Windows build compatibility is checked; Windows runtime behavior remains experimental.
