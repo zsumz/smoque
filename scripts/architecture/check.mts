@@ -6,6 +6,7 @@ import { inspectPublicEntrypointContract } from './contract/public-entrypoints.m
 import { findDependencyCycles } from './dependency/find-dependency-cycles.mts';
 import { createRuntimeDependencyGraph } from './dependency/runtime-dependency-graph.mts';
 import {
+    collectAllFiles,
     collectDirectJavaScriptModuleFiles,
     collectJavaScriptModuleFiles,
     collectModuleFiles,
@@ -50,10 +51,7 @@ for (const file of inspectedFiles) {
     failures.push(...await checkModule(root, sourceRoot, file));
 }
 const sourceFiles = await collectModuleFiles(sourceRoot);
-const testModules = [
-    ...await collectModuleFiles(testRoot),
-    ...await collectJavaScriptModuleFiles(testRoot),
-];
+const testModules = await collectAllFiles(testRoot);
 const rejectedTestModules: Set<string> = new Set();
 for (const file of testModules) {
     const relative = relativePath(root, file);

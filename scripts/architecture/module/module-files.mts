@@ -5,6 +5,10 @@ export async function collectModuleFiles(directory: string): Promise<string[]> {
     return collectFiles(directory, (name) => name.endsWith('.ts') || name.endsWith('.mts'));
 }
 
+export async function collectAllFiles(directory: string): Promise<string[]> {
+    return collectFiles(directory, () => true);
+}
+
 export async function collectJavaScriptModuleFiles(directory: string): Promise<string[]> {
     return collectFiles(directory, isJavaScriptModule);
 }
