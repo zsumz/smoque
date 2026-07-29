@@ -4,7 +4,7 @@ smoque uses the same smoke files locally and in CI. Selection, output, and failu
 
 ## Select the Proof
 
-Run a directory, one smoke file, or a glob:
+Run a directory, one smoke file, or a path fragment:
 
 ```sh
 npx smoque list smoke/

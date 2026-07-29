@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { normalizeLineEndings } from './line-endings.mts';
 import { createPublicApiReport } from './public-api-report.mts';
 
 const apiReportPath = 'etc/public-api.api.md';
@@ -14,7 +15,7 @@ export async function inspectPublicApi(root: string): Promise<string[]> {
     if (expected === undefined) {
         return [`${apiReportPath}: public API report is missing; run npm run api:update.`];
     }
-    return expected === report
+    return normalizeLineEndings(expected) === normalizeLineEndings(report)
         ? []
         : [`${apiReportPath}: public API signatures changed; review and run npm run api:update.`];
 }
