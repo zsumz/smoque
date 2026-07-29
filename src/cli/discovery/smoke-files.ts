@@ -61,6 +61,7 @@ export async function importSmokeFiles(files: string[]): Promise<void> {
     registerBundledRuntimeResolver();
 
     for (const file of files) {
+        // This loader is the sole architecture-allowlisted nonliteral import boundary.
         await import(pathToFileURL(file).href);
     }
 }

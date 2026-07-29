@@ -1,7 +1,9 @@
 import type ts from 'typescript';
 import {
+    collectNonliteralDynamicImports,
     collectStaticModuleReferences,
 } from '../dependency/static-module-references.mts';
+import { nonliteralDynamicImportFailure } from './dynamic-import-policy.mts';
 import {
     facadeImportFailure,
 } from './facade-policy.mts';
@@ -17,6 +19,19 @@ export function inspectSourceImports(
 ): string[] {
     const failures: string[] = [];
     const relativeSource = relativePath(root, file);
+
+    const nonliteralFailure = nonliteralDynamicImportFailure(relativeSource);
+    if (nonliteralFailure !== undefined) {
+        for (const node of collectNonliteralDynamicImports(sourceFile)) {
+            const start = sourceFile.getLineAndCharacterOfPosition(
+                node.getStart(sourceFile),
+            );
+            failures.push(
+                `${relativeSource}:${String(start.line + 1)}:`
+                + `${String(start.character + 1)} ${nonliteralFailure}`,
+            );
+        }
+    }
 
     for (const reference of collectStaticModuleReferences(sourceFile)) {
         const target = resolveImportedSourceModule(

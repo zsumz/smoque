@@ -1,7 +1,7 @@
 import ts from 'typescript';
 
 export interface StaticModuleReference {
-    kind: 'import' | 'export' | 'dynamic-import';
+    kind: 'import' | 'export' | 'import-type' | 'dynamic-import';
     node: ts.Node;
     specifier: string;
     typeOnly: boolean;
@@ -31,6 +31,16 @@ export function collectStaticModuleReferences(
             });
             return;
         }
+        const importTypeSpecifier = literalImportTypeSpecifier(node);
+        if (importTypeSpecifier !== undefined) {
+            references.push({
+                kind: 'import-type',
+                node,
+                specifier: importTypeSpecifier.text,
+                typeOnly: true,
+            });
+            return;
+        }
         const dynamicSpecifier = literalDynamicImportSpecifier(node);
         if (dynamicSpecifier !== undefined) {
             references.push({
@@ -46,6 +56,25 @@ export function collectStaticModuleReferences(
 
     visit(sourceFile);
     return references;
+}
+
+export function collectNonliteralDynamicImports(
+    sourceFile: ts.SourceFile,
+): ts.CallExpression[] {
+    const imports: ts.CallExpression[] = [];
+
+    function visit(node: ts.Node): void {
+        if (
+            isDynamicImportCall(node)
+            && literalDynamicImportSpecifier(node) === undefined
+        ) {
+            imports.push(node);
+        }
+        ts.forEachChild(node, visit);
+    }
+
+    visit(sourceFile);
+    return imports;
 }
 
 function hasLiteralModuleSpecifier(
@@ -86,13 +115,24 @@ function isTypeOnlyExport(statement: ts.ExportDeclaration): boolean {
         && statement.exportClause.elements.every((specifier) => specifier.isTypeOnly);
 }
 
+function literalImportTypeSpecifier(
+    node: ts.Node,
+): ts.StringLiteral | undefined {
+    if (!ts.isImportTypeNode(node) || !ts.isLiteralTypeNode(node.argument)) {
+        return undefined;
+    }
+    return ts.isStringLiteral(node.argument.literal)
+        ? node.argument.literal
+        : undefined;
+}
+
 function literalDynamicImportSpecifier(
     node: ts.Node,
 ): ts.StringLiteral | undefined {
     if (
-        !ts.isCallExpression(node)
-        || node.expression.kind !== ts.SyntaxKind.ImportKeyword
-        || node.arguments.length !== 1
+        !isDynamicImportCall(node)
+        || node.arguments.length < 1
+        || node.arguments.length > 2
     ) {
         return undefined;
     }
@@ -100,4 +140,9 @@ function literalDynamicImportSpecifier(
     return specifier !== undefined && ts.isStringLiteral(specifier)
         ? specifier
         : undefined;
+}
+
+function isDynamicImportCall(node: ts.Node): node is ts.CallExpression {
+    return ts.isCallExpression(node)
+        && node.expression.kind === ts.SyntaxKind.ImportKeyword;
 }
