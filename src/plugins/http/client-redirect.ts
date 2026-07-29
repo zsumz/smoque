@@ -10,6 +10,7 @@ const redirectStatuses = new Set([301, 302, 303, 307, 308]);
 const bodyHeaderNames = [
     'content-encoding',
     'content-language',
+    'content-length',
     'content-location',
     'content-type',
 ];

@@ -19,6 +19,7 @@ test.each([
     ({ status, method, nextMethod, keepsBody }) => {
         const headers = new Headers({
             authorization: 'Bearer secret',
+            'content-length': String(body.length),
             'content-type': 'application/json',
         });
         const redirected = redirectRequest(
@@ -40,6 +41,10 @@ test.each([
         assert.equal(
             redirected.headers.get('content-type'),
             keepsBody ? 'application/json' : null,
+        );
+        assert.equal(
+            redirected.headers.get('content-length'),
+            keepsBody ? String(body.length) : null,
         );
         assert.equal(redirected.headers.get('authorization'), null);
     },
