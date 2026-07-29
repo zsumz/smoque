@@ -10,14 +10,35 @@ export interface ComposeCommandRecord {
     stderr: string;
 }
 
-export function wrapComposeError(error: unknown, projectName: string): SmokeError {
-    if (error instanceof SmokeError) {
+export interface ComposeRecoveryError {
+    phase: 'evidence' | 'cleanup';
+    message: string;
+}
+
+export function wrapComposeError(
+    error: unknown,
+    projectName: string,
+    recoveryErrors: ComposeRecoveryError[] = [],
+): SmokeError {
+    if (error instanceof SmokeError && recoveryErrors.length === 0) {
         return error;
     }
 
-    return new SmokeError(`Docker Compose project ${projectName} failed: ${formatError(error)}`, {
+    const message = error instanceof SmokeError
+        ? error.message
+        : `Docker Compose project ${projectName} failed: ${formatError(error)}`;
+    const details = error instanceof SmokeError ? error.details : undefined;
+    const wrapped = new SmokeError(message, {
+        ...details ?? {},
         projectName,
+        ...recoveryErrors.length === 0 ? {} : { recoveryErrors },
     });
+
+    if (error instanceof SmokeError) {
+        wrapped.name = error.name;
+    }
+
+    return wrapped;
 }
 
 export function formatCommandHistory(history: ComposeCommandRecord[]): string {

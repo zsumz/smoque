@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { chmod, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-export type FakeDockerMode = 'ok' | 'missing-compose' | 'up-fails';
+export type FakeDockerMode = 'ok' | 'missing-compose' | 'up-fails' | 'up-and-down-fail';
 
 export interface FakeDockerCommand {
     args: string[];
@@ -43,7 +43,7 @@ if (command === "version") {
   process.exit(0);
 }
 if (command === "up") {
-  if (mode === "up-fails") {
+  if (mode === "up-fails" || mode === "up-and-down-fail") {
     console.error("api failed to start");
     process.exit(17);
   }
@@ -60,6 +60,10 @@ if (command === "logs") {
   process.exit(0);
 }
 if (command === "down") {
+  if (mode === "up-and-down-fail") {
+    console.error("compose cleanup failed");
+    process.exit(18);
+  }
   console.log("removed");
   process.exit(0);
 }

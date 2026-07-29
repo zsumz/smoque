@@ -5,6 +5,7 @@ import type { ArtifactSink } from '../../types/artifacts.js';
 import type { SmokeContext } from '../../types/context.js';
 import { composeCheck } from './compose-check.js';
 import { ComposeCommandRunner } from './compose-command-runner.js';
+import { rethrowComposeStartFailure } from './compose-start-recovery.js';
 import type {
     ComposeLogsOptions,
     ComposeProject,
@@ -17,7 +18,6 @@ import {
 import {
     formatCommandHistory,
     formatError,
-    wrapComposeError,
 } from './errors.js';
 import {
     parsePublishedPort,
@@ -42,9 +42,7 @@ export async function composeUp(
     try {
         await project.up(options.services ?? []);
     } catch (error) {
-        await project.attachOnFailure(t.attach);
-        await project.cleanup().catch(() => undefined);
-        throw wrapComposeError(error, project.projectName);
+        await rethrowComposeStartFailure(error, project, t.attach);
     }
 
     return project;
