@@ -1,4 +1,7 @@
-import ts from 'typescript';
+import type ts from 'typescript';
+import {
+    collectStaticModuleReferences,
+} from '../dependency/static-module-references.mts';
 import {
     facadeImportFailure,
 } from './facade-policy.mts';
@@ -15,20 +18,19 @@ export function inspectSourceImports(
     const failures: string[] = [];
     const relativeSource = relativePath(root, file);
 
-    for (const statement of sourceFile.statements) {
-        if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) {
-            continue;
-        }
+    for (const reference of collectStaticModuleReferences(sourceFile)) {
         const target = resolveImportedSourceModule(
             sourceRoot,
             file,
-            statement.moduleSpecifier.text,
+            reference.specifier,
         );
         const relativeTarget = target === undefined ? undefined : relativePath(root, target);
         if (relativeTarget === undefined) {
             continue;
         }
-        const start = sourceFile.getLineAndCharacterOfPosition(statement.getStart(sourceFile));
+        const start = sourceFile.getLineAndCharacterOfPosition(
+            reference.node.getStart(sourceFile),
+        );
         const prefix = `${relativeSource}:${String(start.line + 1)}:`
             + `${String(start.character + 1)} `;
         const facadeFailure = facadeImportFailure(

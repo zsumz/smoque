@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import ts from 'typescript';
 import { relativePath } from '../module/module-files.mts';
-import { runtimeModuleSpecifier } from './runtime-module-specifier.mts';
+import { collectStaticModuleReferences } from './static-module-references.mts';
 
 export async function createRuntimeDependencyGraph(
     root: string,
@@ -21,10 +21,13 @@ export async function createRuntimeDependencyGraph(
             true,
             ts.ScriptKind.TS,
         );
-        const dependencies = sourceFile.statements
-            .map(runtimeModuleSpecifier)
-            .filter((specifier): specifier is string => specifier !== undefined)
-            .map((specifier) => resolveSourceModule(sourceRoot, file, specifier))
+        const dependencies = collectStaticModuleReferences(sourceFile)
+            .filter((reference) => !reference.typeOnly)
+            .map((reference) => resolveSourceModule(
+                sourceRoot,
+                file,
+                reference.specifier,
+            ))
             .filter((target): target is string => target !== undefined && sourceFiles.has(target))
             .map((target) => relativePath(root, target));
         graph.set(relativePath(root, file), [...new Set(dependencies)].sort());

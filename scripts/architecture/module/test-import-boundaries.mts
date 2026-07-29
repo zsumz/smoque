@@ -1,4 +1,7 @@
-import ts from 'typescript';
+import type ts from 'typescript';
+import {
+    collectStaticModuleReferences,
+} from '../dependency/static-module-references.mts';
 import { testFacadeImportFailure } from './facade-policy.mts';
 import { relativePath } from './module-files.mts';
 import { resolveTestSourceModule } from './test-module-target.mts';
@@ -11,14 +14,11 @@ export function inspectTestImports(
     const failures: string[] = [];
     const relativeSource = relativePath(root, file);
 
-    for (const statement of sourceFile.statements) {
-        if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) {
-            continue;
-        }
+    for (const reference of collectStaticModuleReferences(sourceFile)) {
         const target = resolveTestSourceModule(
             root,
             file,
-            statement.moduleSpecifier.text,
+            reference.specifier,
         );
         if (target === undefined) {
             continue;
@@ -28,7 +28,7 @@ export function inspectTestImports(
         );
         if (failure !== undefined) {
             const start = sourceFile.getLineAndCharacterOfPosition(
-                statement.getStart(sourceFile),
+                reference.node.getStart(sourceFile),
             );
             failures.push(
                 `${relativeSource}:${String(start.line + 1)}:`
