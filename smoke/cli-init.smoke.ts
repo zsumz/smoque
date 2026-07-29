@@ -14,6 +14,7 @@ smoke.suite('CLI init scaffolds smoke conventions', async (t) => {
 
         expect.value(result.stdout).toMatch(/Created smoke\/project\.smoke\.ts/u);
         expect.value(result.stdout).toMatch(/Created smoke\/AGENTS\.md/u);
+        expect.value(result.stdout).toMatch(/Created smoke\/tsconfig\.json/u);
     });
 
     await t.step('scaffold contains runnable smoke file', async () => {
@@ -32,6 +33,14 @@ smoke.suite('CLI init scaffolds smoke conventions', async (t) => {
 
         await expect.file(agentsFile).toContain('Use `smoque`.');
         await expect.file(agentsFile).toContain('Name files `*.smoke.ts`');
+    });
+
+    await t.step('scaffold contains runtime-safe TypeScript config', async () => {
+        const tsconfig = project.path('smoke', 'tsconfig.json');
+
+        await expect.file(tsconfig).toContain('"erasableSyntaxOnly": true');
+        await expect.file(tsconfig).toContain('"verbatimModuleSyntax": true');
+        await expect.file(tsconfig).toContain('"**/*.mts"');
     });
 
     await t.step('doctor recognizes scaffold', async () => {

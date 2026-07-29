@@ -7,6 +7,7 @@ Use \`smoque\`.
 - Put smoke files under \`smoke/\`.
 - Name files \`*.smoke.ts\`.
 - Keep smoke-file TypeScript erasable so Node can strip types without a build step.
+- Run \`tsc -p smoke/tsconfig.json\` to check the same runtime-safe TypeScript contract.
 - Use \`smoke.suite("name", async (t) => { ... })\`.
 - Wrap every meaningful action in \`await t.step("name", async () => { ... })\`.
 
@@ -60,5 +61,19 @@ smoke.suite("project smoke", async (t) => {
 
 async function assertNodeAvailable(t: SmokeContext): Promise<void> {
   await t.cmd("node", ["--version"]);
+}
+`;
+
+export const smokeTsconfigTemplate = `{
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "module": "Preserve",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "target": "ES2022",
+    "verbatimModuleSyntax": true
+  },
+  "include": ["**/*.ts", "**/*.mts"]
 }
 `;

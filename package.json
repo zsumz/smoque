@@ -56,7 +56,7 @@
     "smoke:list": "npm run build && node dist/cli/main.js list smoke/",
     "api:update": "node scripts/architecture/contract/update-public-api.mts",
     "architecture:check": "node scripts/architecture/check.mts",
-    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p scripts/tsconfig.json && tsc -p smoke/tsconfig.json && tsc -p examples/tsconfig.json && tsc -p test/architecture/tsconfig.json",
+    "typecheck": "npm run build && tsc -p scripts/tsconfig.json && tsc -p smoke/tsconfig.json && tsc -p examples/tsconfig.json && tsc -p test/architecture/tsconfig.json",
     "typecheck:tests": "tsc -p test/tsconfig.json && tsc -p test/integration/smoke-runner/tsconfig.json",
     "test": "npm run build && npm run typecheck:tests && vitest run",
     "coverage": "npm run build && vitest run --coverage",
@@ -74,7 +74,7 @@
     "@vitest/coverage-v8": "^4.1.9",
     "eslint": "^10.6.0",
     "eslint-config-rubric": "^0.1.0-alpha.0",
-    "typescript": "^5.0.0",
+    "typescript": "^5.8.0",
     "vitest": "^4.1.9"
   },
   "license": "MIT"

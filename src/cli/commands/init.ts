@@ -1,7 +1,11 @@
 import { mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-import { initialSmokeTemplate, smokeAgentsTemplate } from '../templates/scaffold.js';
+import {
+    initialSmokeTemplate,
+    smokeAgentsTemplate,
+    smokeTsconfigTemplate,
+} from '../templates/scaffold.js';
 import { writeTemplateFile } from '../templates/write-template-file.js';
 
 export async function initCommand(args: string[]): Promise<number> {
@@ -9,6 +13,7 @@ export async function initCommand(args: string[]): Promise<number> {
     const smokeDir = resolve(process.cwd(), 'smoke');
     const smokePath = resolve(smokeDir, 'project.smoke.ts');
     const agentsPath = resolve(smokeDir, 'AGENTS.md');
+    const tsconfigPath = resolve(smokeDir, 'tsconfig.json');
 
     await mkdir(smokeDir, { recursive: true });
 
@@ -27,6 +32,17 @@ export async function initCommand(args: string[]): Promise<number> {
         created.push('smoke/AGENTS.md');
     } else {
         skipped.push('smoke/AGENTS.md');
+    }
+
+    const tsconfigResult = await writeTemplateFile(
+        tsconfigPath,
+        smokeTsconfigTemplate,
+        force,
+    );
+    if (tsconfigResult === 'created') {
+        created.push('smoke/tsconfig.json');
+    } else {
+        skipped.push('smoke/tsconfig.json');
     }
 
     for (const path of created) {

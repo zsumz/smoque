@@ -15,6 +15,7 @@ test('smoque init writes a runnable smoke scaffold and smoke conventions', async
         assert.equal(result.stderr, '');
         assert.match(result.stdout, /Created smoke\/project\.smoke\.ts/u);
         assert.match(result.stdout, /Created smoke\/AGENTS\.md/u);
+        assert.match(result.stdout, /Created smoke\/tsconfig\.json/u);
         assert.match(result.stdout, /Next: smoque list/u);
         assert.match(result.stdout, /Next: smoque run/u);
 
@@ -28,6 +29,11 @@ test('smoque init writes a runnable smoke scaffold and smoke conventions', async
 
         const agents = await readFile(join(root, 'smoke', 'AGENTS.md'), 'utf8');
         assert.match(agents, /^# Smoke Test Conventions/mu);
+
+        const tsconfig = await readFile(join(root, 'smoke', 'tsconfig.json'), 'utf8');
+        assert.match(tsconfig, /"erasableSyntaxOnly": true/u);
+        assert.match(tsconfig, /"verbatimModuleSyntax": true/u);
+        assert.match(tsconfig, /"\*\*\/\*\.mts"/u);
 
         const listed = await runCli(['list'], root);
 
@@ -52,28 +58,36 @@ test('smoque init skips existing scaffold files unless forced', async () => {
         await mkdir(join(root, 'smoke'), { recursive: true });
         await writeFile(join(root, 'smoke', 'project.smoke.ts'), '// Existing smoke\n', 'utf8');
         await writeFile(join(root, 'smoke', 'AGENTS.md'), '# Existing agents\n', 'utf8');
+        await writeFile(join(root, 'smoke', 'tsconfig.json'), '{}\n', 'utf8');
 
         const skipped = await runCli(['init'], root);
 
         assert.equal(skipped.exitCode, 0, cliResultSummary(skipped));
         assert.match(skipped.stdout, /Skipped smoke\/project\.smoke\.ts; already exists\./u);
         assert.match(skipped.stdout, /Skipped smoke\/AGENTS\.md; already exists\./u);
+        assert.match(skipped.stdout, /Skipped smoke\/tsconfig\.json; already exists\./u);
         assert.match(skipped.stdout, /Re-run with --force/u);
         assert.equal(
             await readFile(join(root, 'smoke', 'project.smoke.ts'), 'utf8'),
             '// Existing smoke\n',
         );
         assert.equal(await readFile(join(root, 'smoke', 'AGENTS.md'), 'utf8'), '# Existing agents\n');
+        assert.equal(await readFile(join(root, 'smoke', 'tsconfig.json'), 'utf8'), '{}\n');
 
         const forced = await runCli(['init', '--force'], root);
 
         assert.equal(forced.exitCode, 0, cliResultSummary(forced));
         assert.match(forced.stdout, /Wrote smoke\/project\.smoke\.ts/u);
         assert.match(forced.stdout, /Wrote smoke\/AGENTS\.md/u);
+        assert.match(forced.stdout, /Wrote smoke\/tsconfig\.json/u);
         assert.match(await readFile(join(root, 'smoke', 'project.smoke.ts'), 'utf8'), /project smoke/u);
         assert.match(
             await readFile(join(root, 'smoke', 'AGENTS.md'), 'utf8'),
             /^# Smoke Test Conventions/mu,
+        );
+        assert.match(
+            await readFile(join(root, 'smoke', 'tsconfig.json'), 'utf8'),
+            /"erasableSyntaxOnly": true/u,
         );
     } finally {
         await rm(root, { recursive: true, force: true });

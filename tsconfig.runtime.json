@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "noEmit": true,
+    "paths": {
+      "smoque": ["dist/index.d.ts"],
+      "smoque/plugin": ["dist/plugin.d.ts"]
+    },
+    "verbatimModuleSyntax": true
+  }
+}

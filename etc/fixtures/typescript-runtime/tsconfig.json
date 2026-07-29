@@ -1,0 +1,13 @@
+{
+  "extends": "../../../tsconfig.runtime.json",
+  "compilerOptions": {
+    "types": []
+  },
+  "files": [
+    "enum.ts",
+    "namespace.ts",
+    "parameter-property.ts",
+    "type-import.ts",
+    "types.ts"
+  ]
+}
