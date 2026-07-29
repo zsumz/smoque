@@ -3,6 +3,7 @@ import {
     processGroupError,
     processGroupStopError,
 } from './process-group-errors.js';
+import { SerializedOperations } from './serialized-operations.js';
 import type { ArtifactSink } from './types/artifacts.js';
 import type { PathRef } from './types/path-ref.js';
 import type {
@@ -32,6 +33,7 @@ export function createManagedProcessGroup(
 class ManagedProcessGroup implements ProcessGroup {
     public readonly kind = 'process-group';
     private readonly handles: Array<{ name: string; handle: ProcessHandle }> = [];
+    private readonly lifecycle = new SerializedOperations();
     private stopped = false;
 
     constructor(
@@ -45,6 +47,17 @@ class ManagedProcessGroup implements ProcessGroup {
         command: string,
         args: string[] = [],
         options: ProcessGroupStartOptions = {},
+    ): Promise<ProcessHandle> {
+        return await this.lifecycle.run(
+            async () => await this.startExclusive(name, command, args, options),
+        );
+    }
+
+    private async startExclusive(
+        name: string,
+        command: string,
+        args: string[],
+        options: ProcessGroupStartOptions,
     ): Promise<ProcessHandle> {
         if (this.stopped) {
             throw new SmokeError(`Process group is already stopped: ${this.name}`, {
@@ -76,7 +89,7 @@ class ManagedProcessGroup implements ProcessGroup {
         } catch (error) {
             let stopError: unknown;
             try {
-                await this.stop();
+                await this.stopExclusive();
             } catch (errorDuringStop) {
                 stopError = errorDuringStop;
             }
@@ -89,6 +102,12 @@ class ManagedProcessGroup implements ProcessGroup {
     }
 
     public async stop(signal = 'SIGTERM'): Promise<void> {
+        await this.lifecycle.run(async () => {
+            await this.stopExclusive(signal);
+        });
+    }
+
+    private async stopExclusive(signal = 'SIGTERM'): Promise<void> {
         if (this.stopped) {
             return;
         }
