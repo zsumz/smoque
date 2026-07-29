@@ -75,3 +75,63 @@ test('allowed redirect destinations are followed', async () => {
         await close(target);
     }
 });
+
+test('cross-origin redirects strip sensitive headers and retain ordinary headers', async () => {
+    let receivedHeaders: Record<string, string | string[] | undefined> | undefined;
+    const target = createServer((request, response) => {
+        receivedHeaders = request.headers;
+        response.end('redirected');
+    });
+    await listen(target);
+    const source = createServer((_request, response) => {
+        response.statusCode = 302;
+        response.setHeader(
+            'location',
+            `http://127.0.0.1:${String(serverPort(target))}/target`,
+        );
+        response.end();
+    });
+    await listen(source);
+
+    smoke.use(httpPlugin());
+    smoke.suite('sensitive redirect headers', async (t) => {
+        await t.http.get(
+            `http://127.0.0.1:${String(serverPort(source))}/start`,
+            {
+                headers: {
+                    authorization: 'Bearer secret',
+                    cookie: 'session=secret',
+                    cookie2: 'legacy=secret',
+                    host: 'spoofed.invalid',
+                    'proxy-authorization': 'Basic secret',
+                    'www-authenticate': 'Basic realm=secret',
+                    'x-request-id': 'request-1',
+                },
+            },
+        );
+    });
+
+    try {
+        const result = await runRegisteredSuites({ repoRoot: process.cwd() });
+
+        assert.equal(result.status, 'passed');
+        assert.ok(receivedHeaders);
+        for (const name of [
+            'authorization',
+            'cookie',
+            'cookie2',
+            'proxy-authorization',
+            'www-authenticate',
+        ]) {
+            assert.equal(receivedHeaders[name], undefined);
+        }
+        assert.equal(receivedHeaders['x-request-id'], 'request-1');
+        assert.equal(
+            receivedHeaders.host,
+            `127.0.0.1:${String(serverPort(target))}`,
+        );
+    } finally {
+        await close(source);
+        await close(target);
+    }
+});

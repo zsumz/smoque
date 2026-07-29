@@ -21,6 +21,7 @@ test.each([
             authorization: 'Bearer secret',
             'content-length': String(body.length),
             'content-type': 'application/json',
+            host: 'source.example',
         });
         const redirected = redirectRequest(
             {
@@ -47,6 +48,7 @@ test.each([
             keepsBody ? String(body.length) : null,
         );
         assert.equal(redirected.headers.get('authorization'), null);
+        assert.equal(redirected.headers.get('host'), null);
     },
 );
 

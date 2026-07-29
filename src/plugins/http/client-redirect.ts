@@ -14,6 +14,13 @@ const bodyHeaderNames = [
     'content-location',
     'content-type',
 ];
+const crossOriginSensitiveHeaders = [
+    'authorization',
+    'cookie',
+    'cookie2',
+    'proxy-authorization',
+    'www-authenticate',
+];
 
 interface HttpRequestState {
     method: string;
@@ -77,8 +84,11 @@ export function redirectRequest(
         }
     }
     if (new URL(request.url).origin !== new URL(url).origin) {
-        headers.delete('authorization');
+        for (const name of crossOriginSensitiveHeaders) {
+            headers.delete(name);
+        }
     }
+    headers.delete('host');
     return { method, url, headers, body };
 }
 
@@ -94,11 +104,18 @@ function redirectedMethod(method: string, status: number): string {
 }
 
 function resolveRedirectUrl(currentUrl: string, location: string): string {
+    const current = new URL(currentUrl);
     const resolved = new URL(location, currentUrl);
     if (resolved.protocol !== 'http:' && resolved.protocol !== 'https:') {
         throw new SmokeError(`Unsupported HTTP redirect protocol: ${resolved.protocol}`, {
             url: resolved.toString(),
             protocol: resolved.protocol,
+        });
+    }
+    if (current.protocol === 'https:' && resolved.protocol === 'http:') {
+        throw new SmokeError('Refusing HTTP redirect from https:// to http://.', {
+            sourceUrl: current.toString(),
+            destinationUrl: resolved.toString(),
         });
     }
     return resolved.toString();
