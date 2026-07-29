@@ -4,6 +4,8 @@ import { expect, forbidden, smoke } from 'smoque';
 
 const expectedEntries = [
     'package/LICENSE',
+    'package/README.md',
+    'package/smoque-logo.svg',
     'package/dist/index.js',
     'package/dist/core.js',
     'package/dist/plugin.js',
@@ -12,6 +14,13 @@ const expectedEntries = [
     'package/dist/plugins/http.js',
     'package/dist/plugins/archive.js',
     'package/package.json',
+];
+
+const packagedGuideLinks = [
+    'https://github.com/zsumz/smoque/blob/main/docs/authoring.md',
+    'https://github.com/zsumz/smoque/blob/main/docs/integrations.md',
+    'https://github.com/zsumz/smoque/blob/main/docs/automation.md',
+    'https://github.com/zsumz/smoque/tree/main/examples',
 ];
 
 smoke.suite('smoque package publishes public runtime files only', { tags: ['package'] }, async (t) => {
@@ -61,5 +70,16 @@ smoke.suite('smoque package publishes public runtime files only', { tags: ['pack
             false,
             'smoque tarball should not include source or test files',
         );
+
+        const readme = await t.cmd(
+            'tar',
+            ['-xOf', tarball.path, 'package/README.md'],
+        );
+        for (const link of packagedGuideLinks) {
+            assert.ok(
+                readme.stdout.includes(`](${link})`),
+                `packed README should link to ${link}`,
+            );
+        }
     });
 });

@@ -84,7 +84,7 @@ Use smoque for checks that sit near the edge of the project:
 
 ## Guides
 
-[Authoring](./docs/authoring.md) · [Built-in integrations](./docs/integrations.md) · [Automation](./docs/automation.md) · [Examples](./examples)
+[Authoring](https://github.com/zsumz/smoque/blob/main/docs/authoring.md) · [Built-in integrations](https://github.com/zsumz/smoque/blob/main/docs/integrations.md) · [Automation](https://github.com/zsumz/smoque/blob/main/docs/automation.md) · [Examples](https://github.com/zsumz/smoque/tree/main/examples)
 
 ## Notes
 
