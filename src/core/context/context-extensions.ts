@@ -77,5 +77,10 @@ function assignDotted(target: object, dottedName: string, value: unknown): void 
 }
 
 function isSmokeResource(value: unknown): value is SmokeResource {
-    return typeof value === 'object' && value !== null && 'cleanup' in value;
+    return (
+        typeof value === 'object'
+        && value !== null
+        && 'cleanup' in value
+        && typeof value.cleanup === 'function'
+    );
 }
