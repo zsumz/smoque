@@ -12,15 +12,17 @@ import {
     relativePath,
 } from './module/module-files.mts';
 import { checkModule } from './module/check-module.mts';
+import { testFilePolicyFailure } from './module/test-file-policy.mts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const sourceRoot = path.join(root, 'src');
+const testRoot = path.join(root, 'test');
 const scriptsRoot = path.join(root, 'scripts');
 const smokeRoot = path.join(root, 'smoke');
 const examplesRoot = path.join(root, 'examples');
 const inspectedRoots = [
     sourceRoot,
-    path.join(root, 'test'),
+    testRoot,
     scriptsRoot,
     smokeRoot,
     examplesRoot,
@@ -48,16 +50,30 @@ for (const file of inspectedFiles) {
     failures.push(...await checkModule(root, sourceRoot, file));
 }
 const sourceFiles = await collectModuleFiles(sourceRoot);
+const testModules = [
+    ...await collectModuleFiles(testRoot),
+    ...await collectJavaScriptModuleFiles(testRoot),
+];
+const rejectedTestModules: Set<string> = new Set();
+for (const file of testModules) {
+    const relative = relativePath(root, file);
+    const failure = testFilePolicyFailure(relative);
+    if (failure !== undefined) {
+        rejectedTestModules.add(file);
+        failures.push(failure);
+    }
+}
 const javascriptModules = [
     ...await collectDirectJavaScriptModuleFiles(root),
     ...await collectJavaScriptModuleFiles(sourceRoot),
     ...await collectJavaScriptModuleFiles(scriptsRoot),
     ...await collectJavaScriptModuleFiles(smokeRoot),
     ...await collectJavaScriptModuleFiles(examplesRoot),
+    ...await collectJavaScriptModuleFiles(testRoot),
 ];
 for (const file of javascriptModules) {
     const relative = relativePath(root, file);
-    if (allowedJavaScriptModules.has(relative)) {
+    if (allowedJavaScriptModules.has(relative) || rejectedTestModules.has(file)) {
         continue;
     }
     failures.push(
