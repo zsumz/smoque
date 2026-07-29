@@ -1,4 +1,8 @@
 import { SmokeError } from './errors.js';
+import {
+    processGroupError,
+    processGroupStopError,
+} from './process-group-errors.js';
 import type { ArtifactSink } from './types/artifacts.js';
 import type { PathRef } from './types/path-ref.js';
 import type {
@@ -70,8 +74,13 @@ class ManagedProcessGroup implements ProcessGroup {
             this.handles.push({ name, handle });
             return handle;
         } catch (error) {
-            await this.stop();
-            throw processGroupError(error, this.name, name);
+            let stopError: unknown;
+            try {
+                await this.stop();
+            } catch (errorDuringStop) {
+                stopError = errorDuringStop;
+            }
+            throw processGroupError(error, this.name, name, stopError);
         }
     }
 
@@ -109,34 +118,4 @@ class ManagedProcessGroup implements ProcessGroup {
             await handle.attachOnFailure?.(attach);
         }
     }
-}
-
-function processGroupError(
-    error: unknown,
-    processGroup: string,
-    processName: string,
-): SmokeError {
-    const details = error instanceof SmokeError ? error.details : undefined;
-    const message = error instanceof Error ? error.message : String(error);
-    const wrapped = new SmokeError(
-        `Process group "${processGroup}" failed starting "${processName}": ${message}`,
-        {
-            ...details ?? {},
-            processGroup,
-            processName,
-        },
-    );
-
-    if (error instanceof Error) {
-        wrapped.name = error.name;
-    }
-
-    return wrapped;
-}
-
-function processGroupStopError(errors: unknown[], processGroup: string): SmokeError {
-    return new SmokeError(`Process group "${processGroup}" failed during cleanup.`, {
-        processGroup,
-        errors: errors.map((error) => error instanceof Error ? error.message : String(error)),
-    });
 }
