@@ -1,7 +1,8 @@
 import { assertNetworkAllowed } from '../../network.js';
 import type { SmokeContext } from '../../types/context.js';
 import type { HttpRequestOptions, HttpResponse } from './client-types.js';
-import { executeHttpRequest, parseHttpDuration } from './client-transport.js';
+import { executeHttpRedirects } from './client-redirect.js';
+import { parseHttpDuration } from './client-transport.js';
 import { createHttpResponse } from './http-response.js';
 import { classifyHttpRequestError } from './tls.js';
 import {
@@ -24,8 +25,6 @@ export async function request(
     url: string,
     options: HttpRequestOptions = {},
 ): Promise<HttpResponse> {
-    assertNetworkAllowed(context, method, url);
-
     const headers = new Headers(options.headers ?? {});
     const body = requestBody(headers, options);
     const controller = new AbortController();
@@ -36,14 +35,17 @@ export async function request(
         : undefined;
 
     try {
-        const response = await executeHttpRequest(
+        const response = await executeHttpRedirects({
             method,
             url,
             headers,
             body,
             options,
-            controller.signal,
-        );
+            signal: controller.signal,
+            authorize: (nextMethod, nextUrl) => {
+                assertNetworkAllowed(context, nextMethod, nextUrl);
+            },
+        });
         const text = response.body;
         const transcriptInput: TranscriptInputInit = {
             url,

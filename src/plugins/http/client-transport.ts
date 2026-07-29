@@ -26,10 +26,16 @@ export async function executeHttpRequest(
             Object.fromEntries(headers.entries()),
             body,
             options,
+            signal,
         );
     }
 
-    const init: RequestInit = { method, headers, signal };
+    const init: RequestInit = {
+        method,
+        headers,
+        signal,
+        redirect: 'manual',
+    };
     if (body !== undefined) {
         init.body = typeof body === 'string' ? body : new Blob([toArrayBuffer(body)]);
     }
@@ -72,6 +78,7 @@ async function nodeHttpRequest(
     headers: Record<string, string>,
     body: string | Uint8Array | undefined,
     options: HttpRequestOptions,
+    signal: AbortSignal,
 ): Promise<NormalizedHttpResponse> {
     const parsed = new URL(url);
     const tls = await normalizeTlsOptions(parsed, options.tls);
@@ -80,6 +87,7 @@ async function nodeHttpRequest(
         headers,
         rejectUnauthorized: tls.rejectUnauthorized,
         ca: tls.ca,
+        signal,
     };
     const client = parsed.protocol === 'https:' ? httpsRequest : httpRequest;
 

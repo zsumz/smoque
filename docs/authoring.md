@@ -51,7 +51,7 @@ File, TCP, HTTP, process-output, and custom probes all use the same polling life
 
 Use `expect` for values, command output, files, file sets, archives, text snapshots, JSON paths, and directory snapshots. Attach useful failure evidence with `t.attach.file()`, `t.attach.dir()`, or `t.attach.text()`.
 
-Secrets registered with `t.redact()` are removed from commands, errors, logs, reports, and attached text. Use `t.net.policy({ external: "block" })` when a smoke test should only reach local or explicitly allowed hosts.
+Secrets registered with `t.redact()` are removed from commands, errors, logs, reports, and attached text. Use `t.net.policy({ external: "block" })` to restrict requests made through `t.http` to local or explicitly allowed hosts, including every redirect destination. This policy is not an operating-system network sandbox: it does not govern commands started through `t.cmd()` or networking code called directly by a smoke test.
 
 ## Cleanup
 
