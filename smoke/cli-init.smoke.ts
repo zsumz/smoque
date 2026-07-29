@@ -14,6 +14,7 @@ smoke.suite('CLI init scaffolds smoke conventions', async (t) => {
 
         expect.value(result.stdout).toMatch(/Created smoke\/project\.smoke\.ts/u);
         expect.value(result.stdout).toMatch(/Created smoke\/AGENTS\.md/u);
+        expect.value(result.stdout).toMatch(/Created smoke\/package\.json/u);
         expect.value(result.stdout).toMatch(/Created smoke\/tsconfig\.json/u);
     });
 
@@ -36,9 +37,13 @@ smoke.suite('CLI init scaffolds smoke conventions', async (t) => {
     });
 
     await t.step('scaffold contains runtime-safe TypeScript config', async () => {
+        const packageFile = project.path('smoke', 'package.json');
         const tsconfig = project.path('smoke', 'tsconfig.json');
 
+        await expect.file(packageFile).toContain('"type": "module"');
         await expect.file(tsconfig).toContain('"erasableSyntaxOnly": true');
+        await expect.file(tsconfig).toContain('"module": "NodeNext"');
+        await expect.file(tsconfig).toContain('"moduleResolution": "NodeNext"');
         await expect.file(tsconfig).toContain('"verbatimModuleSyntax": true');
         await expect.file(tsconfig).toContain('"**/*.mts"');
     });

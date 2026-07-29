@@ -68,12 +68,18 @@ export const smokeTsconfigTemplate = `{
   "compilerOptions": {
     "allowImportingTsExtensions": true,
     "erasableSyntaxOnly": true,
-    "module": "Preserve",
-    "moduleResolution": "Bundler",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "noEmit": true,
     "target": "ES2022",
     "verbatimModuleSyntax": true
   },
   "include": ["**/*.ts", "**/*.mts"]
+}
+`;
+
+export const smokePackageTemplate = `{
+  "private": true,
+  "type": "module"
 }
 `;
