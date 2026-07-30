@@ -5,6 +5,10 @@ import {
     type ServerResponse,
 } from 'node:http';
 
+import {
+    closeServer,
+    listenOnEphemeralPort,
+} from '../../shared/server.js';
 import type { CapturedRequest } from './fake-request-expectations.js';
 import {
     requestPath,
@@ -32,7 +36,7 @@ export async function startFakeServer(
         });
     });
 
-    await listen(server);
+    await listenOnEphemeralPort(server);
     const address = server.address();
     if (typeof address !== 'object' || address === null) {
         throw new Error('Fake HTTP server did not bind to a TCP port.');
@@ -42,15 +46,7 @@ export async function startFakeServer(
 }
 
 export async function closeFakeServer(server: Server): Promise<void> {
-    return new Promise((resolve, reject) => {
-        server.close((error) => {
-            if (error) {
-                reject(error);
-                return;
-            }
-            resolve();
-        });
-    });
+    await closeServer(server);
 }
 
 async function handleFakeRequest(
@@ -79,16 +75,6 @@ async function handleFakeRequest(
     }
 
     writeFakeResponse(response, route);
-}
-
-async function listen(server: Server): Promise<void> {
-    return new Promise((resolve, reject) => {
-        server.once('error', reject);
-        server.listen(0, '127.0.0.1', () => {
-            server.off('error', reject);
-            resolve();
-        });
-    });
 }
 
 async function readBody(request: IncomingMessage): Promise<string> {

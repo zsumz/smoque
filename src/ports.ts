@@ -6,6 +6,10 @@ import {
     isReservedPort,
     type ReservedPortDetails,
 } from './ports/reserved-port-env.js';
+import {
+    closeServer,
+    listenOnEphemeralPort,
+} from './shared/server.js';
 import type { PortReserveOptions, PortsApi, ReservedPort } from './types/ports.js';
 
 export {
@@ -85,7 +89,7 @@ function createReservedPort(name: string, host: string, port: number): ReservedP
 
 async function allocatePort(host: string, usedPorts: Set<number>): Promise<number> {
     for (let attempt = 0; attempt < 25; attempt += 1) {
-        const port = await listenOnEphemeralPort(host);
+        const port = await reserveEphemeralPort(host);
         if (!usedPorts.has(port)) {
             return port;
         }
@@ -94,28 +98,17 @@ async function allocatePort(host: string, usedPorts: Set<number>): Promise<numbe
     throw new SmokeError('Could not allocate a unique local TCP port.', { host });
 }
 
-async function listenOnEphemeralPort(host: string): Promise<number> {
+async function reserveEphemeralPort(host: string): Promise<number> {
     const server = createServer();
 
-    await new Promise<void>((resolve, reject) => {
-        server.once('error', reject);
-        server.listen(0, host, resolve);
-    });
+    await listenOnEphemeralPort(server, host);
 
     const address = server.address();
     if (typeof address !== 'object' || address === null) {
         throw new SmokeError('Could not read allocated local TCP port.', { host });
     }
 
-    await new Promise<void>((resolve, reject) => {
-        server.close((error) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve();
-            }
-        });
-    });
+    await closeServer(server);
 
     return address.port;
 }
