@@ -73,6 +73,7 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  # Keep repository code outside the job that can mint an npm credential.
   stage:
     name: Stage validated package on npm
     needs: validate

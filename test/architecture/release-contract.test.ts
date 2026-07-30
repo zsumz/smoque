@@ -21,7 +21,7 @@ describe('release contract', () => {
         assert.deepEqual(releaseContractFailures(validMetadata), []);
     });
 
-    test('rejects prerelease and mismatched tags', () => {
+    test('rejects prerelease package versions', () => {
         const failures = releaseContractFailures({
             ...validMetadata,
             tag: 'v0.1.1-rc.0',
@@ -32,6 +32,17 @@ describe('release contract', () => {
 
         assert.deepEqual(failures, [
             'package version must be stable semantic versioning.',
+        ]);
+    });
+
+    test('rejects tags that do not match the package version', () => {
+        const failures = releaseContractFailures({
+            ...validMetadata,
+            tag: 'v0.1.2',
+        });
+
+        assert.deepEqual(failures, [
+            'release tag must exactly match v<package version>.',
         ]);
     });
 

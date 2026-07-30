@@ -61,6 +61,7 @@ jobs:
             "${{ steps.package.outputs.tarball }}" \
             "${{ inputs.version }}"
 
+  # Only this job can write repository contents; it runs no repository scripts.
   publish:
     name: Publish GitHub release
     needs: verify

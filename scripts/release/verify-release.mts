@@ -21,7 +21,8 @@ if (tag === undefined) {
 
 const packageJson = await readJson('package.json');
 const packageLock = await readJson('package-lock.json');
-const lockRoot = readRecord(readProperty(packageLock, 'packages'), '');
+const lockPackages = readProperty(packageLock, 'packages');
+const lockRoot = readProperty(lockPackages, '');
 const metadata: ReleaseMetadata = {
     tag,
     packageName: readString(packageJson, 'name'),
@@ -75,10 +76,6 @@ function readProperty(value: unknown, key: string): unknown {
     return typeof value === 'object' && value !== null && key in value
         ? value[key as keyof typeof value]
         : undefined;
-}
-
-function readRecord(value: unknown, key: string): unknown {
-    return readProperty(value, key);
 }
 
 function readString(value: unknown, key: string): string | undefined {

@@ -8,6 +8,7 @@ if (outputDirectory === undefined) {
     throw new Error('Usage: pack-release.mts <output-directory>');
 }
 
+// The release gate already built dist; do not rerun repository lifecycle hooks.
 const result = runReleaseCommand('npm', [
     'pack',
     '--ignore-scripts',
