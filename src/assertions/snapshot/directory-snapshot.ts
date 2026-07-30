@@ -1,10 +1,13 @@
 import { createHash } from 'node:crypto';
-import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
-import { dirname, relative, resolve } from 'node:path';
+import { readdir, readFile, stat } from 'node:fs/promises';
+import { relative, resolve } from 'node:path';
 
 import { SmokeError } from '../../errors.js';
 import { pathToString } from '../../path-ref.js';
-import { isNotFoundError } from '../../shared/fs.js';
+import {
+    isNotFoundError,
+    writeTextFileWithParents,
+} from '../../shared/fs.js';
 import { isRecord } from '../../shared/objects.js';
 import type { ChecksumAlgorithm } from '../../types/checksum.js';
 import type { PathRef } from '../../types/path-ref.js';
@@ -26,7 +29,7 @@ class DirectorySnapshotExpectationImpl implements DirectorySnapshotExpectation {
         const serialized = `${JSON.stringify(actual, null, 2)}\n`;
 
         if (isSnapshotUpdateMode()) {
-            await writeSnapshot(snapshotPath, serialized);
+            await writeTextFileWithParents(snapshotPath, serialized);
             return;
         }
 
@@ -136,11 +139,6 @@ async function readSnapshot(path: string, kind: 'directory' | 'text'): Promise<s
         }
         throw error;
     }
-}
-
-async function writeSnapshot(path: string, value: string): Promise<void> {
-    await mkdir(dirname(path), { recursive: true });
-    await writeFile(path, value, 'utf8');
 }
 
 function normalizePath(path: string): string {

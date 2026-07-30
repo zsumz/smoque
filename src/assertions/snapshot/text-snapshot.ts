@@ -1,9 +1,11 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import { readFile } from 'node:fs/promises';
 
 import { SmokeError } from '../../errors.js';
 import { pathToString } from '../../path-ref.js';
-import { isNotFoundError } from '../../shared/fs.js';
+import {
+    isNotFoundError,
+    writeTextFileWithParents,
+} from '../../shared/fs.js';
 import type { PathRef } from '../../types/path-ref.js';
 import type { TextSnapshotExpectation } from '../types.js';
 import { isSnapshotUpdateMode } from './update-mode.js';
@@ -19,7 +21,7 @@ class TextSnapshotExpectationImpl implements TextSnapshotExpectation {
         const snapshotPath = pathToString(path);
 
         if (isSnapshotUpdateMode()) {
-            await writeTextSnapshot(snapshotPath, this.value);
+            await writeTextFileWithParents(snapshotPath, this.value);
             return;
         }
 
@@ -46,11 +48,6 @@ async function readTextSnapshot(path: string): Promise<string> {
         }
         throw error;
     }
-}
-
-async function writeTextSnapshot(path: string, value: string): Promise<void> {
-    await mkdir(dirname(path), { recursive: true });
-    await writeFile(path, value, 'utf8');
 }
 
 function diffText(expected: string, actual: string): string {

@@ -1,4 +1,5 @@
-import { access } from 'node:fs/promises';
+import { access, mkdir, writeFile } from 'node:fs/promises';
+import { dirname } from 'node:path';
 
 import { hasErrorCode } from './errors.js';
 
@@ -16,4 +17,12 @@ export async function pathExists(path: string): Promise<boolean> {
         }
         throw error;
     }
+}
+
+export async function writeTextFileWithParents(
+    path: string,
+    value: string,
+): Promise<void> {
+    await mkdir(dirname(path), { recursive: true });
+    await writeFile(path, value, 'utf8');
 }

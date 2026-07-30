@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'vitest';
 
 import {
+    escapeRegExp,
     formatTextPattern,
     matchesTextPattern,
 } from '../../../dist/shared/text-pattern.js';
@@ -18,4 +19,13 @@ test('text patterns match strings and reusable regular expressions', () => {
 test('text patterns have stable diagnostic formatting', () => {
     assert.equal(formatTextPattern('ready'), '"ready"');
     assert.equal(formatTextPattern(/ready/u), '/ready/u');
+});
+
+test('regular expression escaping preserves literal text', () => {
+    const value = 'path/to/file.[name]?';
+
+    assert.equal(
+        new RegExp(`^${escapeRegExp(value)}$`, 'u').test(value),
+        true,
+    );
 });

@@ -1,6 +1,8 @@
 import { readdir, stat } from 'node:fs/promises';
 import { relative, resolve } from 'node:path';
 
+import { escapeRegExp } from '../../shared/text-pattern.js';
+
 export async function listMatchingFiles(
     root: string,
     patterns: readonly string[],
@@ -67,8 +69,4 @@ function globToRegExp(pattern: string): RegExp {
     }
 
     return new RegExp(`^${source}$`, 'u');
-}
-
-function escapeRegExp(value: string): string {
-    return value.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
 }

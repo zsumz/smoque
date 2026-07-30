@@ -1,10 +1,10 @@
-import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, rm } from 'node:fs/promises';
 import { homedir, tmpdir } from 'node:os';
-import { dirname, isAbsolute, parse, relative, resolve } from 'node:path';
+import { isAbsolute, parse, relative, resolve } from 'node:path';
 
 import { UnsafePathError } from './errors.js';
 import { pathToString, resolveContextPath, toPathRef } from './path-ref.js';
-import { pathExists } from './shared/fs.js';
+import { pathExists, writeTextFileWithParents } from './shared/fs.js';
 import type { FileSystemApi, SafeRemoveOptions, WorkDirOptions } from './types/filesystem.js';
 import type { PathRef } from './types/path-ref.js';
 import type { Probe } from './types/probe.js';
@@ -25,14 +25,16 @@ export function createFileSystemApi(repoRoot: PathRef): FileSystemApi {
             await mkdir(resolveContextPath(repoRoot, path), { recursive: true });
         },
         async writeText(path, value): Promise<void> {
-            const destination = resolveContextPath(repoRoot, path);
-            await mkdir(dirname(destination), { recursive: true });
-            await writeFile(destination, value, 'utf8');
+            await writeTextFileWithParents(
+                resolveContextPath(repoRoot, path),
+                value,
+            );
         },
         async writeJson(path, value): Promise<void> {
-            const destination = resolveContextPath(repoRoot, path);
-            await mkdir(dirname(destination), { recursive: true });
-            await writeFile(destination, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
+            await writeTextFileWithParents(
+                resolveContextPath(repoRoot, path),
+                `${JSON.stringify(value, null, 2)}\n`,
+            );
         },
         async readText(path): Promise<string> {
             return await readFile(resolveContextPath(repoRoot, path), 'utf8');

@@ -3,6 +3,7 @@ import { beforeEach, test } from 'vitest';
 
 import { resetSmokeRegistry, runRegisteredSuites, smoke } from '../../../../dist/core.js';
 import type { SmokeEvent } from '../../../../dist/events.js';
+import { escapeRegExp } from '../../../../dist/shared/text-pattern.js';
 
 beforeEach(() => {
     resetSmokeRegistry();
@@ -53,7 +54,3 @@ test('t.cmd captures output, execution metadata, and command events', async () =
     const commandStarted = events.find((event) => event.type === 'command.started');
     assert.equal(commandStarted?.stepId, 'suite-1:step-1');
 });
-
-function escapeRegExp(value: string): string {
-    return value.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
-}

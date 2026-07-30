@@ -7,6 +7,9 @@ import {
     createTerminalReporter,
 } from '../../../dist/core.js';
 import type { SmokeEvent, SmokeEventSink } from '../../../dist/core.js';
+import { escapeRegExp } from '../../../dist/shared/text-pattern.js';
+
+export { escapeRegExp } from '../../../dist/shared/text-pattern.js';
 
 interface CapturedReporters {
     readonly github: string;
@@ -72,8 +75,4 @@ export function assertAllRedacted(values: readonly string[], secret: string): vo
     for (const value of values) {
         assert.doesNotMatch(value, secretPattern);
     }
-}
-
-export function escapeRegExp(value: string): string {
-    return value.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
 }

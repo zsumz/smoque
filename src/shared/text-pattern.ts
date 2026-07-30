@@ -15,3 +15,7 @@ export function formatTextPattern(pattern: string | RegExp): string {
         ? JSON.stringify(pattern)
         : String(pattern);
 }
+
+export function escapeRegExp(value: string): string {
+    return value.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
+}
