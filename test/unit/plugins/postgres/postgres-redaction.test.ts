@@ -12,13 +12,16 @@ test('Postgres URL redaction decodes passwords and tolerates malformed URLs', ()
         },
     } as unknown as SmokeContext;
     const url = 'postgres://user:p%40ss@127.0.0.1:5432/app';
+    const malformedPassword = 'postgres://user:bad%ZZ@127.0.0.1:5432/app';
 
     redactUrl(context, url);
     redactUrl(context, 'not a URL');
+    redactUrl(context, malformedPassword);
 
     assert.deepEqual(redacted, [
         url,
         'p@ss',
         'not a URL',
+        malformedPassword,
     ]);
 });

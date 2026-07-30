@@ -48,8 +48,9 @@ export function mergeSqlOptions(defaults: PostgresSqlOptions, options: PostgresS
 export function redactUrl(t: SmokeContext, url: string): void {
     t.redact(url);
     const parsed = URL.parse(url);
-    if (parsed?.password) {
-        t.redact(decodeURIComponent(parsed.password));
+    const password = decodePassword(parsed?.password);
+    if (password !== undefined) {
+        t.redact(password);
     }
 }
 
@@ -62,4 +63,15 @@ function paramToString(value: PostgresParamValue): string {
         return '';
     }
     return String(value);
+}
+
+function decodePassword(value: string | undefined): string | undefined {
+    if (!value) {
+        return undefined;
+    }
+    try {
+        return decodeURIComponent(value);
+    } catch {
+        return undefined;
+    }
 }
