@@ -3,6 +3,7 @@ import { request as httpsRequest } from 'node:https';
 import { text as readText } from 'node:stream/consumers';
 
 import type { HttpRequestOptions } from './client-types.js';
+import { parseHttpDuration } from './client-timeout.js';
 import { headersToRecord } from './headers.js';
 import { normalizeTlsOptions } from './tls.js';
 
@@ -18,7 +19,7 @@ export async function executeHttpRequest(
     headers: Headers,
     body: string | Uint8Array | undefined,
     options: HttpRequestOptions,
-    signal: AbortSignal,
+    signal: AbortSignal | undefined,
 ): Promise<NormalizedHttpResponse> {
     if (options.tls !== undefined) {
         return nodeHttpRequest(
@@ -34,31 +35,15 @@ export async function executeHttpRequest(
     const init: RequestInit = {
         method,
         headers,
-        signal,
         redirect: 'manual',
     };
+    if (signal !== undefined) {
+        init.signal = signal;
+    }
     if (body !== undefined) {
         init.body = typeof body === 'string' ? body : new Blob([toArrayBuffer(body)]);
     }
     return fetchHttpRequest(url, init);
-}
-
-export function parseHttpDuration(value: string): number {
-    const match = /^(\d+)(ms|s|m)$/.exec(value);
-    if (!match) {
-        throw new Error(`Invalid HTTP timeout: ${value}`);
-    }
-
-    const amount = Number.parseInt(match[1] ?? '0', 10);
-    const unit = match[2];
-
-    if (unit === 'ms') {
-        return amount;
-    }
-    if (unit === 's') {
-        return amount * 1000;
-    }
-    return amount * 60_000;
 }
 
 async function fetchHttpRequest(
@@ -79,7 +64,7 @@ async function nodeHttpRequest(
     headers: Record<string, string>,
     body: string | Uint8Array | undefined,
     options: HttpRequestOptions,
-    signal: AbortSignal,
+    signal: AbortSignal | undefined,
 ): Promise<NormalizedHttpResponse> {
     const parsed = new URL(url);
     const tls = await normalizeTlsOptions(parsed, options.tls);
@@ -88,7 +73,7 @@ async function nodeHttpRequest(
         headers,
         rejectUnauthorized: tls.rejectUnauthorized,
         ca: tls.ca,
-        signal,
+        ...signal === undefined ? {} : { signal },
     };
     const client = parsed.protocol === 'https:' ? httpsRequest : httpRequest;
 

@@ -31,7 +31,7 @@ interface HttpRequestState {
 
 interface HttpRedirectInput extends HttpRequestState {
     options: HttpRequestOptions;
-    signal: AbortSignal;
+    signal: AbortSignal | undefined;
     authorize(method: string, url: string): void;
 }
 

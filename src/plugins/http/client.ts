@@ -2,7 +2,10 @@ import { assertNetworkAllowed } from '../../network.js';
 import type { SmokeContext } from '../../types/context.js';
 import type { HttpRequestOptions, HttpResponse } from './client-types.js';
 import { executeHttpRedirects } from './client-redirect.js';
-import { parseHttpDuration } from './client-transport.js';
+import {
+    createHttpTimeoutSignal,
+    preserveHttpTimeoutError,
+} from './client-timeout.js';
 import { createHttpResponse } from './http-response.js';
 import { parseOptionalJson } from './json.js';
 import { classifyHttpRequestError } from './tls.js';
@@ -28,12 +31,7 @@ export async function request(
 ): Promise<HttpResponse> {
     const headers = new Headers(options.headers ?? {});
     const body = requestBody(headers, options);
-    const controller = new AbortController();
-    const timeout = options.timeout
-        ? setTimeout(() => {
-            controller.abort();
-        }, parseHttpDuration(options.timeout))
-        : undefined;
+    const signal = createHttpTimeoutSignal(options.timeout);
 
     try {
         const response = await executeHttpRedirects({
@@ -42,7 +40,7 @@ export async function request(
             headers,
             body,
             options,
-            signal: controller.signal,
+            signal,
             authorize: (nextMethod, nextUrl) => {
                 assertNetworkAllowed(context, nextMethod, nextUrl);
             },
@@ -63,11 +61,12 @@ export async function request(
 
         return createHttpResponse(createTranscriptInput(transcriptInput));
     } catch (error) {
+        const requestError = preserveHttpTimeoutError(error, signal);
         const transcriptInput: TranscriptInputInit = {
             url,
             method,
             requestHeaders: Object.fromEntries(headers.entries()),
-            error: error instanceof Error ? error.message : String(error),
+            error: requestError instanceof Error ? requestError.message : String(requestError),
         };
         if (typeof body === 'string') {
             transcriptInput.requestBody = body;
@@ -77,11 +76,7 @@ export async function request(
             transcriptName(method, url),
             formatHttpTranscript(createTranscriptInput(transcriptInput)),
         );
-        throw classifyHttpRequestError(method, url, error);
-    } finally {
-        if (timeout) {
-            clearTimeout(timeout);
-        }
+        throw classifyHttpRequestError(method, url, requestError);
     }
 }
 
