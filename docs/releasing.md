@@ -21,7 +21,8 @@ publishing, and remove obsolete automation tokens. Enable immutable GitHub
 Releases when the repository setting is available.
 
 Protect `main` with required CI, signed commits, linear history, and blocked
-force pushes. Protect `v*` tags from updates and deletion.
+force pushes. Create an active `v*` tag ruleset that restricts creation,
+updates, and deletion, with only the release maintainer allowed to bypass it.
 
 ## Prepare
 
