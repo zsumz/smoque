@@ -33,7 +33,7 @@
     "dist/**/*.js",
     "dist/**/*.d.ts"
   ],
-  "packageManager": "npm@10.9.8",
+  "packageManager": "npm@11.19.0",
   "engines": {
     "node": ">=22.18.0"
   },
