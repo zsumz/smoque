@@ -3,7 +3,10 @@ import { relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { isNotFoundError } from '../../shared/fs.js';
-import { normalizePath } from '../path.js';
+import {
+    normalizePath,
+    normalizeRelativePattern,
+} from '../path.js';
 import { registerBundledRuntimeResolver } from './bundled-runtime-resolver.js';
 
 const ignoredDiscoveryDirectories = new Set([
@@ -87,10 +90,6 @@ async function listSmokeFiles(root: string): Promise<string[]> {
 
 function isSmokeFile(path: string): boolean {
     return /\.(?:smoke)\.(?:js|mjs|ts|mts)$/u.test(path);
-}
-
-function normalizeRelativePattern(pattern: string): string {
-    return normalizePath(pattern).replace(/^\.\/+/u, '').replace(/\/+$/u, '');
 }
 
 async function realPathIfExists(path: string): Promise<string | undefined> {

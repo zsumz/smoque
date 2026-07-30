@@ -13,6 +13,7 @@ import {
     type FakeRoute,
 } from './fake-routes.js';
 import { headersToRecord } from './headers.js';
+import { parseOptionalJson } from './json.js';
 
 export interface FakeServerTransport {
     server: Server;
@@ -66,7 +67,7 @@ async function handleFakeRequest(
         path,
         headers: headersToRecord(request.headers),
         body,
-        json: parseJson(body),
+        json: parseOptionalJson(body),
     });
 
     const route = routes.get(routeKey(method, path));
@@ -99,16 +100,4 @@ async function readBody(request: IncomingMessage): Promise<string> {
             resolve(Buffer.concat(chunks).toString('utf8'));
         });
     });
-}
-
-function parseJson(text: string): unknown {
-    if (text.trim() === '') {
-        return undefined;
-    }
-
-    try {
-        return JSON.parse(text);
-    } catch {
-        return undefined;
-    }
 }

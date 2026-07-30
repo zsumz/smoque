@@ -3,6 +3,10 @@ import { relative } from 'node:path';
 
 import { SmokeError } from '../../errors.js';
 import { pathToString } from '../../path-ref.js';
+import {
+    formatTextPattern,
+    matchesTextPattern,
+} from '../../shared/text-pattern.js';
 import type { FileSetExpectation, ForbiddenRule } from '../../types/expectations.js';
 import type { PathRef } from '../../types/path-ref.js';
 import { listMatchingFiles, normalizeFilePath } from './file-selection.js';
@@ -19,12 +23,13 @@ class FileSetExpectationImpl implements FileSetExpectation {
 
             for (const file of files) {
                 const content = await readFile(file, 'utf8');
-                const found = patterns.find((pattern) => matches(content, pattern));
+                const found = patterns.find((pattern) =>
+                    matchesTextPattern(content, pattern));
                 if (found) {
-                    throw new SmokeError(`Expected files not to contain ${formatPattern(found)}.`, {
+                    throw new SmokeError(`Expected files not to contain ${formatTextPattern(found)}.`, {
                         root: this.root,
                         file,
-                        pattern: formatPattern(found),
+                        pattern: formatTextPattern(found),
                     });
                 }
             }
@@ -38,7 +43,10 @@ class FileSetExpectationImpl implements FileSetExpectation {
 
                 for (const rule of normalizedRules) {
                     const scope = rule.scope ?? 'content';
-                    if ((scope === 'path' || scope === 'both') && matches(relativePath, rule.pattern)) {
+                    if (
+                        (scope === 'path' || scope === 'both')
+                        && matchesTextPattern(relativePath, rule.pattern)
+                    ) {
                         throw new SmokeError(`Forbidden file matched rule "${rule.name}": ${relativePath}`, {
                             root: this.root,
                             file,
@@ -82,7 +90,8 @@ class FileSetExpectationImpl implements FileSetExpectation {
 
         for (const file of files) {
             const content = await readFile(file, 'utf8');
-            const found = patterns.find((pattern) => matches(content, pattern));
+            const found = patterns.find((pattern) =>
+                matchesTextPattern(content, pattern));
             if (found) {
                 return;
             }
@@ -91,7 +100,7 @@ class FileSetExpectationImpl implements FileSetExpectation {
         throw new SmokeError('Expected at least one matched file to contain one of the patterns.', {
             root: this.root,
             matchedFiles: files,
-            patterns: patterns.map(formatPattern),
+            patterns: patterns.map(formatTextPattern),
         });
     }
 
@@ -100,29 +109,16 @@ class FileSetExpectationImpl implements FileSetExpectation {
     }
 }
 
-function matches(content: string, pattern: string | RegExp): boolean {
-    if (typeof pattern === 'string') {
-        return content.includes(pattern);
-    }
-
-    pattern.lastIndex = 0;
-    return pattern.test(content);
-}
-
 function findForbiddenContent(
     content: string,
     pattern: string | RegExp,
 ): { line: number } | undefined {
     const lines = content.split(/\r?\n/u);
     for (let index = 0; index < lines.length; index += 1) {
-        if (matches(lines[index] ?? '', pattern)) {
+        if (matchesTextPattern(lines[index] ?? '', pattern)) {
             return { line: index + 1 };
         }
     }
 
     return undefined;
-}
-
-function formatPattern(pattern: string | RegExp): string {
-    return typeof pattern === 'string' ? JSON.stringify(pattern) : String(pattern);
 }

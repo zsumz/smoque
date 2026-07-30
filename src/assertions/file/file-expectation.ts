@@ -4,6 +4,10 @@ import { readFile } from 'node:fs/promises';
 import { SmokeError } from '../../errors.js';
 import { pathToString } from '../../path-ref.js';
 import { isNotFoundError, pathExists } from '../../shared/fs.js';
+import {
+    formatTextPattern,
+    matchesTextPattern,
+} from '../../shared/text-pattern.js';
 import type { ChecksumAlgorithm } from '../../types/checksum.js';
 import type { ExecutableOptions } from '../../types/expectations.js';
 import type { PathRef } from '../../types/path-ref.js';
@@ -27,19 +31,19 @@ export function createFileExpectation(path: string | PathRef): FileExpectation {
         },
         async toContain(expected): Promise<void> {
             const content = await readExistingFile(target);
-            if (!matches(content, expected)) {
-                throw new SmokeError(`Expected file to contain ${formatPattern(expected)}: ${target}`, {
+            if (!matchesTextPattern(content, expected)) {
+                throw new SmokeError(`Expected file to contain ${formatTextPattern(expected)}: ${target}`, {
                     path: target,
-                    expected: formatPattern(expected),
+                    expected: formatTextPattern(expected),
                 });
             }
         },
         async notToContain(expected): Promise<void> {
             const content = await readExistingFile(target);
-            if (matches(content, expected)) {
-                throw new SmokeError(`Expected file not to contain ${formatPattern(expected)}: ${target}`, {
+            if (matchesTextPattern(content, expected)) {
+                throw new SmokeError(`Expected file not to contain ${formatTextPattern(expected)}: ${target}`, {
                     path: target,
-                    expected: formatPattern(expected),
+                    expected: formatTextPattern(expected),
                 });
             }
         },
@@ -83,17 +87,4 @@ async function readExistingFile(path: string): Promise<string> {
         }
         throw error;
     }
-}
-
-function matches(content: string, pattern: string | RegExp): boolean {
-    if (typeof pattern === 'string') {
-        return content.includes(pattern);
-    }
-
-    pattern.lastIndex = 0;
-    return pattern.test(content);
-}
-
-function formatPattern(pattern: string | RegExp): string {
-    return typeof pattern === 'string' ? JSON.stringify(pattern) : String(pattern);
 }

@@ -4,6 +4,7 @@ import type { HttpRequestOptions, HttpResponse } from './client-types.js';
 import { executeHttpRedirects } from './client-redirect.js';
 import { parseHttpDuration } from './client-transport.js';
 import { createHttpResponse } from './http-response.js';
+import { parseOptionalJson } from './json.js';
 import { classifyHttpRequestError } from './tls.js';
 import {
     createTranscriptInput,
@@ -54,7 +55,7 @@ export async function request(
             status: response.status,
             headers: response.headers,
             body: text,
-            json: parseJson(text),
+            json: parseOptionalJson(text),
         };
         if (typeof body === 'string') {
             transcriptInput.requestBody = body;
@@ -95,16 +96,4 @@ function requestBody(
         return JSON.stringify(options.json);
     }
     return options.body;
-}
-
-function parseJson(text: string): unknown {
-    if (text.trim() === '') {
-        return undefined;
-    }
-
-    try {
-        return JSON.parse(text);
-    } catch {
-        return undefined;
-    }
 }

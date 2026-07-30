@@ -1,3 +1,7 @@
+import {
+    formatTextPattern,
+    matchesTextPattern,
+} from './shared/text-pattern.js';
 import type { LogApi, LogContainsOptions } from './types/log.js';
 import type { Probe } from './types/probe.js';
 import type { ProcessHandle } from './types/process.js';
@@ -8,7 +12,7 @@ export function createLogApi(write: (message: string) => Promise<void> | void): 
     log.contains = (pattern: string | RegExp, options: LogContainsOptions = {}): Probe => {
         const stream = options.stream ?? 'both';
         return {
-            description: `process log ${stream} contains ${formatPattern(pattern)}`,
+            description: `process log ${stream} contains ${formatTextPattern(pattern)}`,
             async check(process) {
                 if (!process) {
                     return Promise.resolve({
@@ -19,7 +23,7 @@ export function createLogApi(write: (message: string) => Promise<void> | void): 
 
                 const text = readProcessLog(process, stream);
                 return Promise.resolve({
-                    ready: matches(text, pattern),
+                    ready: matchesTextPattern(text, pattern),
                     message: `captured ${String(text.length)} characters`,
                 });
             },
@@ -38,12 +42,4 @@ function readProcessLog(process: ProcessHandle, stream: 'stdout' | 'stderr' | 'b
         case 'both':
             return `${process.stdout()}\n${process.stderr()}`;
     }
-}
-
-function matches(value: string, pattern: string | RegExp): boolean {
-    return typeof pattern === 'string' ? value.includes(pattern) : pattern.test(value);
-}
-
-function formatPattern(pattern: string | RegExp): string {
-    return typeof pattern === 'string' ? JSON.stringify(pattern) : String(pattern);
 }

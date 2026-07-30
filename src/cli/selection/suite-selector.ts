@@ -1,7 +1,10 @@
 import { relative, resolve } from 'node:path';
 
 import type { SmokeSuite } from '../../types/suite.js';
-import { normalizePath } from '../path.js';
+import {
+    normalizePath,
+    normalizeRelativePattern,
+} from '../path.js';
 
 export interface SuiteSelectionOptions {
     pattern?: string;
@@ -83,8 +86,4 @@ function matchesTags(suite: SmokeSuite, includeTags: string[], excludeTags: stri
 
 function normalizeTags(tags: string[]): string[] {
     return tags.map((tag) => tag.trim()).filter(Boolean);
-}
-
-function normalizeRelativePattern(pattern: string): string {
-    return normalizePath(pattern).replace(/^\.\/+/u, '').replace(/\/+$/u, '');
 }
