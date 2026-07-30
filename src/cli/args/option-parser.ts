@@ -20,11 +20,16 @@ export type CliOption<T extends CliOptions> =
 
 type CliOptionMap<T extends CliOptions> = Readonly<Record<string, CliOption<T>>>;
 
+export interface CliPositionalPolicy {
+    allowEmptyPattern?: boolean;
+}
+
 export function parseCliOptions<T extends CliOptions>(
     command: string,
     args: string[],
     options: T,
     optionMap: CliOptionMap<T>,
+    positionalPolicy: CliPositionalPolicy = {},
 ): T {
     const tokens = parseArgs({
         args,
@@ -36,7 +41,14 @@ export function parseCliOptions<T extends CliOptions>(
 
     for (const token of tokens) {
         if (token.kind === 'positional') {
-            assignPattern(command, args, options, token.index, token.value);
+            assignPattern(
+                command,
+                args,
+                options,
+                token.index,
+                token.value,
+                positionalPolicy,
+            );
             continue;
         }
         if (token.kind === 'option-terminator') {
@@ -76,11 +88,15 @@ function assignPattern(
     options: CliOptions,
     index: number,
     value: string,
+    positionalPolicy: CliPositionalPolicy,
 ): void {
     if (value.startsWith('-')) {
         throw unknownOption(command, args, index);
     }
-    if (value && options.pattern === undefined) {
+    if (
+        (value || positionalPolicy.allowEmptyPattern === true) &&
+        options.pattern === undefined
+    ) {
         options.pattern = value;
         return;
     }

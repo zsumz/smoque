@@ -32,7 +32,13 @@ export function parseListOptions(args: string[]): ListCliOptions {
 }
 
 export function parseSnippetOptions(args: string[]): SnippetCliOptions {
-    return parseCliOptions('snippets', args, {}, snippetOptions);
+    return parseCliOptions(
+        'snippets',
+        args,
+        {},
+        snippetOptions,
+        { allowEmptyPattern: true },
+    );
 }
 
 const runOptions: Readonly<Record<string, CliOption<RunCliOptions>>> = {

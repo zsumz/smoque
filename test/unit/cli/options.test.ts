@@ -39,6 +39,13 @@ test('CLI option parsing retains flags, repeated tags, and positional patterns',
         pattern: 'README.md',
         timeout: '10s',
     });
+    assert.deepEqual(parseSnippetOptions(['']), {
+        pattern: '',
+    });
+    assert.throws(
+        () => parseSnippetOptions(['', 'README.md']),
+        /Unexpected smoque snippets argument: README\.md/u,
+    );
 });
 
 test('CLI option parsing retains smoque token and error-message semantics', () => {
