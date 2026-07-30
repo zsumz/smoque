@@ -2,16 +2,17 @@ import { setTimeout as sleep } from 'node:timers/promises';
 
 import { parseDuration } from './duration.js';
 import { ProbeTimeoutError, SmokeError } from './errors.js';
+import { monotonicMilliseconds } from './timing.js';
 import type { PollOptions } from './types/probe.js';
 
 export async function poll<T>(name: string, fn: () => Promise<T> | T, options: PollOptions = {}): Promise<T> {
     const timeoutMs = parseDuration(options.timeout, 30_000);
     const intervalMs = parseDuration(options.interval, 250);
-    const startedAt = Date.now();
+    const startedAt = monotonicMilliseconds();
     let attempts = 0;
     let lastError: unknown;
 
-    while (Date.now() - startedAt <= timeoutMs) {
+    while (monotonicMilliseconds() - startedAt <= timeoutMs) {
         attempts += 1;
 
         try {
@@ -25,7 +26,7 @@ export async function poll<T>(name: string, fn: () => Promise<T> | T, options: P
             lastError = error;
         }
 
-        const elapsedMs = Date.now() - startedAt;
+        const elapsedMs = monotonicMilliseconds() - startedAt;
         const remainingMs = timeoutMs - elapsedMs;
         if (remainingMs <= 0) {
             break;

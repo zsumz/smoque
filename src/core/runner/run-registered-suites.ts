@@ -1,6 +1,10 @@
 import { SmokeError } from '../../errors.js';
 import { setSnapshotUpdateMode } from '../../assertions/snapshot/update-mode.js';
 import { toPathRef } from '../../path-ref.js';
+import {
+    elapsedMilliseconds,
+    monotonicMilliseconds,
+} from '../../timing.js';
 import type { SmokeRegistry } from '../registry.js';
 import { emitSmokeEvent } from './events.js';
 import { runSuite } from './run-suite.js';
@@ -17,14 +21,15 @@ export async function runRegisteredSuitesForRegistry(
     try {
         const definitions = registry.getDefinitions();
         const runId = options.runId ?? `run-${String(Date.now())}`;
-        const startedAt = Date.now();
+        const wallStartedAt = Date.now();
+        const startedAt = monotonicMilliseconds();
         const eventSink = options.eventSink;
         const repoRoot = toPathRef(options.repoRoot ?? process.cwd());
 
         await emitSmokeEvent(eventSink, {
             type: 'run.started',
             runId,
-            startedAt: new Date(startedAt).toISOString(),
+            startedAt: new Date(wallStartedAt).toISOString(),
         });
 
         const suiteFilterOptions: SuiteFilterOptions = {};
@@ -65,7 +70,7 @@ export async function runRegisteredSuitesForRegistry(
             );
         }
 
-        const durationMs = Date.now() - startedAt;
+        const durationMs = elapsedMilliseconds(startedAt);
         const status = suites.some((suite) => suite.status === 'failed') ? 'failed' : 'passed';
 
         await emitSmokeEvent(eventSink, {

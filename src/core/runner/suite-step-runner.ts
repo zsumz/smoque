@@ -1,4 +1,8 @@
 import type { SerializedSmokeError, SmokeEvent } from '../../events.js';
+import {
+    elapsedMilliseconds,
+    monotonicMilliseconds,
+} from '../../timing.js';
 import type { SmokeStepResult, StepOptions } from '../../types/suite.js';
 import { SmokeSkipSignal } from '../context/skip-signal.js';
 
@@ -25,7 +29,7 @@ export class SuiteStepRunner {
     ): Promise<T> {
         const stepId = `${this.suiteId}:step-${String(this.nextStepId++)}`;
         const previousStepId = this.currentStepId;
-        const startedAt = Date.now();
+        const startedAt = monotonicMilliseconds();
 
         await this.emit({
             type: 'step.started',
@@ -37,12 +41,12 @@ export class SuiteStepRunner {
 
         try {
             const value = await fn();
-            const durationMs = Date.now() - startedAt;
+            const durationMs = elapsedMilliseconds(startedAt);
             this.steps.push({ id: stepId, name, status: 'passed', durationMs });
             await this.emit({ type: 'step.passed', stepId, durationMs });
             return value;
         } catch (error) {
-            const durationMs = Date.now() - startedAt;
+            const durationMs = elapsedMilliseconds(startedAt);
             if (error instanceof SmokeSkipSignal) {
                 this.steps.push({
                     id: stepId,

@@ -5,6 +5,7 @@ import { parseDuration } from './duration.js';
 import { ProbeTimeoutError, SmokeError } from './errors.js';
 import { reservedPortErrorDetails } from './ports.js';
 import type { ManagedProcessHandle } from './process-handle.js';
+import { monotonicMilliseconds } from './timing.js';
 import type { ProcessStartOptions } from './types/process.js';
 
 export async function waitForProcessSpawn(
@@ -29,11 +30,11 @@ export async function waitForProcessReady(
 ): Promise<void> {
     const timeoutMs = parseDuration(options.timeout, 30_000);
     const intervalMs = 100;
-    const startedAt = Date.now();
+    const startedAt = monotonicMilliseconds();
     let attempts = 0;
     let lastMessage: string | undefined;
 
-    while (Date.now() - startedAt <= timeoutMs) {
+    while (monotonicMilliseconds() - startedAt <= timeoutMs) {
         attempts += 1;
 
         if (handle.exitDetails().exitCode !== null || handle.exitDetails().signal !== null) {
@@ -50,7 +51,7 @@ export async function waitForProcessReady(
         }
 
         lastMessage = result?.message;
-        const remainingMs = timeoutMs - (Date.now() - startedAt);
+        const remainingMs = timeoutMs - (monotonicMilliseconds() - startedAt);
         if (remainingMs <= 0) {
             break;
         }

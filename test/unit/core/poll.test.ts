@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { beforeEach, test } from 'vitest';
+import { beforeEach, test, vi } from 'vitest';
 
 import { resetSmokeRegistry, runRegisteredSuites, smoke } from '../../../dist/core.js';
 import { SmokeError } from '../../../dist/errors.js';
@@ -119,6 +119,29 @@ test('poll serializes non-Error timeout failures', async () => {
         );
     }
 });
+
+test('poll deadlines are unaffected by wall-clock rollback', async () => {
+    const dateNow = vi.spyOn(Date, 'now').mockReturnValue(1_000);
+    const pending = poll(
+        'wall-clock independent service',
+        () => false,
+        { timeout: '10ms', interval: '1ms' },
+    );
+    dateNow.mockReturnValue(0);
+
+    try {
+        await assert.rejects(
+            async () => pending,
+            (error) => {
+                assert.ok(error instanceof SmokeError);
+                assert.equal(error.name, 'ProbeTimeoutError');
+                return true;
+            },
+        );
+    } finally {
+        dateNow.mockRestore();
+    }
+}, 1_000);
 
 function assertRecord(value: unknown): asserts value is Record<string, unknown> {
     assert.ok(typeof value === 'object' && value !== null);

@@ -7,6 +7,10 @@ import {
 } from '../process-tree.js';
 import { mergeEnv } from '../shared/env.js';
 import { toPathString } from '../shared/path-ref.js';
+import {
+    elapsedMilliseconds,
+    monotonicMilliseconds,
+} from '../timing.js';
 import type { SmokeEventSink } from '../events.js';
 import type { CommandOptions, CommandResult } from '../types/command.js';
 import type { PathRef } from '../types/path-ref.js';
@@ -26,7 +30,7 @@ export async function runCommand(input: RunCommandInput): Promise<CommandResult>
     const options = input.options ?? {};
     const args = [...input.args];
     const cwd = toPathString(options.cwd ?? input.repoRoot);
-    const startedAt = Date.now();
+    const startedAt = monotonicMilliseconds();
     const stdoutMode = options.stdout ?? 'capture';
     const stderrMode = options.stderr ?? 'capture';
     const stdoutChunks: Buffer[] = [];
@@ -97,7 +101,7 @@ export async function runCommand(input: RunCommandInput): Promise<CommandResult>
         });
 
         child.on('close', (exitCode, signal) => {
-            const durationMs = Date.now() - startedAt;
+            const durationMs = elapsedMilliseconds(startedAt);
             const normalizedExitCode = exitCode ?? (signal ? -1 : 0);
             const timedOut = processTimeout?.didExpire() ?? false;
             const result: CommandResult = {

@@ -1,6 +1,10 @@
 import type { SerializedSmokeError, SmokeEventSink } from '../../events.js';
 import type { PathRef } from '../../types/path-ref.js';
 import type { SmokeSuiteResult } from '../../types/suite.js';
+import {
+    elapsedMilliseconds,
+    monotonicMilliseconds,
+} from '../../timing.js';
 import { SmokeSkipSignal } from '../context/skip-signal.js';
 import type { ExtensionBucket } from '../plugin-registry.js';
 import type { RegisteredSuite } from '../registry.js';
@@ -15,7 +19,7 @@ export async function runSuite(
     keepWorkdirOnFail: boolean,
     eventSink: SmokeEventSink | undefined,
 ): Promise<SmokeSuiteResult> {
-    const startedAt = Date.now();
+    const startedAt = monotonicMilliseconds();
 
     await emitSmokeEvent(eventSink, {
         type: 'suite.started',
@@ -60,7 +64,7 @@ export async function runSuite(
     const cleanupErrors = executor === undefined
         ? []
         : [...attachErrors, ...await executor.runCleanup()];
-    const durationMs = Date.now() - startedAt;
+    const durationMs = elapsedMilliseconds(startedAt);
     const status =
         primaryError !== undefined
         || continuedFailure !== undefined
