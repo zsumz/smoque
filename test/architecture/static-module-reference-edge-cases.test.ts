@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import ts from 'typescript';
 import { test } from 'vitest';
 
 import {
@@ -9,6 +8,7 @@ import {
 import {
     inspectSourceImports,
 } from '../../scripts/architecture/module/source-import-boundaries.mts';
+import { parseSource as parse } from './parse-source.js';
 
 test('static string forms and import-equals dependencies are classified', () => {
     const references = collectStaticModuleReferences(parse(`
@@ -119,13 +119,3 @@ test('the discovered smoke-file loader is the only nonliteral import boundary', 
 
     assert.deepEqual(failures, []);
 });
-
-function parse(source: string): ts.SourceFile {
-    return ts.createSourceFile(
-        'fixture.ts',
-        source,
-        ts.ScriptTarget.Latest,
-        true,
-        ts.ScriptKind.TS,
-    );
-}

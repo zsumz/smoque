@@ -1,11 +1,12 @@
-import assert from 'node:assert/strict';
-import { chmod, readFile, writeFile } from 'node:fs/promises';
+import { chmod, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-export interface FakePostgresDockerCommand {
-    args: string[];
-    cwd: string;
-}
+import {
+    readFakeCommandLog,
+    type FakeCommand,
+} from '../fake-command-log.js';
+
+export type FakePostgresDockerCommand = FakeCommand;
 
 export async function createFakePostgresDocker(root: string): Promise<string> {
     const script = join(root, 'docker');
@@ -56,18 +57,5 @@ process.exit(3);
 export async function readFakePostgresDockerLog(
     root: string,
 ): Promise<FakePostgresDockerCommand[]> {
-    const value = await readFile(join(root, 'docker-commands.jsonl'), 'utf8');
-    return value.trim().split(/\r?\n/u).filter(Boolean).map(parseFakePostgresDockerCommand);
-}
-
-function parseFakePostgresDockerCommand(line: string): FakePostgresDockerCommand {
-    const value: unknown = JSON.parse(line);
-    assert.ok(typeof value === 'object' && value !== null);
-    assert.ok('args' in value && isStringArray(value.args));
-    assert.ok('cwd' in value && typeof value.cwd === 'string');
-    return { args: value.args, cwd: value.cwd };
-}
-
-function isStringArray(value: unknown): value is string[] {
-    return Array.isArray(value) && value.every((item: unknown) => typeof item === 'string');
+    return await readFakeCommandLog(join(root, 'docker-commands.jsonl'));
 }

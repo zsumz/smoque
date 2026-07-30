@@ -1,6 +1,10 @@
-import assert from 'node:assert/strict';
-import { chmod, readFile, writeFile } from 'node:fs/promises';
+import { chmod, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+
+import {
+    readFakeCommandLog,
+    type FakeCommand,
+} from '../fake-command-log.js';
 
 export interface FakePsqlOptions {
     readonly readyFailures?: number;
@@ -10,10 +14,7 @@ export interface FakePsqlOptions {
     readonly queryFails?: boolean;
 }
 
-export interface FakePsqlCommand {
-    args: string[];
-    cwd: string;
-}
+export type FakePsqlCommand = FakeCommand;
 
 export async function createFakePsql(
     root: string,
@@ -82,18 +83,5 @@ process.exit(0);
 }
 
 export async function readFakePsqlLog(root: string): Promise<FakePsqlCommand[]> {
-    const value = await readFile(join(root, 'psql-commands.jsonl'), 'utf8');
-    return value.trim().split(/\r?\n/u).filter(Boolean).map(parseFakePsqlCommand);
-}
-
-function parseFakePsqlCommand(line: string): FakePsqlCommand {
-    const value: unknown = JSON.parse(line);
-    assert.ok(typeof value === 'object' && value !== null);
-    assert.ok('args' in value && isStringArray(value.args));
-    assert.ok('cwd' in value && typeof value.cwd === 'string');
-    return { args: value.args, cwd: value.cwd };
-}
-
-function isStringArray(value: unknown): value is string[] {
-    return Array.isArray(value) && value.every((item: unknown) => typeof item === 'string');
+    return await readFakeCommandLog(join(root, 'psql-commands.jsonl'));
 }

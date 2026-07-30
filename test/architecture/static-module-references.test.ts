@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import ts from 'typescript';
 import { test } from 'vitest';
 
 import {
@@ -11,6 +10,7 @@ import {
 import {
     inspectTestImports,
 } from '../../scripts/architecture/module/test-import-boundaries.mts';
+import { parseSource as parse } from './parse-source.js';
 
 test('static references classify imports, re-exports, and dynamic imports', () => {
     const references = collectStaticModuleReferences(parse(`
@@ -106,13 +106,3 @@ test('source and test facade rules reject re-exports', () => {
         + 'or concrete owner behind src/reporters.ts.',
     ]);
 });
-
-function parse(source: string): ts.SourceFile {
-    return ts.createSourceFile(
-        'fixture.ts',
-        source,
-        ts.ScriptTarget.Latest,
-        true,
-        ts.ScriptKind.TS,
-    );
-}
