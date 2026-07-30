@@ -26,7 +26,6 @@ export function collectStaticModuleReferences(
                 specifier: node.moduleSpecifier.text,
                 typeOnly: isTypeOnlyImport(node),
             });
-            return;
         }
         if (ts.isExportDeclaration(node) && hasLiteralModuleSpecifier(node)) {
             references.push({
@@ -35,7 +34,6 @@ export function collectStaticModuleReferences(
                 specifier: node.moduleSpecifier.text,
                 typeOnly: isTypeOnlyExport(node),
             });
-            return;
         }
         if (ts.isImportEqualsDeclaration(node)) {
             const importEqualsSpecifier = literalImportEqualsSpecifier(node);
@@ -46,7 +44,6 @@ export function collectStaticModuleReferences(
                     specifier: importEqualsSpecifier.text,
                     typeOnly: node.isTypeOnly,
                 });
-                return;
             }
         }
         const importTypeSpecifier = literalImportTypeSpecifier(node);
@@ -57,7 +54,6 @@ export function collectStaticModuleReferences(
                 specifier: importTypeSpecifier.text,
                 typeOnly: true,
             });
-            return;
         }
         const dynamicSpecifier = literalDynamicImportSpecifier(node);
         if (dynamicSpecifier !== undefined) {
@@ -67,7 +63,6 @@ export function collectStaticModuleReferences(
                 specifier: dynamicSpecifier.text,
                 typeOnly: false,
             });
-            return;
         }
         ts.forEachChild(node, visit);
     }

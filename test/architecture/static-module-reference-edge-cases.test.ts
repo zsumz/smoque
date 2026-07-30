@@ -62,6 +62,33 @@ test('layer boundaries inspect every static string dependency form', () => {
     ]);
 });
 
+test('nested import types remain visible to layer boundaries', () => {
+    const sourceFile = parse(`
+        type Nested = import("../types/box.js").Box<
+            import("../plugins/http.js").HttpApi
+        >;
+    `);
+
+    assert.deepEqual(
+        collectStaticModuleReferences(sourceFile).map(({ specifier }) => specifier),
+        [
+            '../types/box.js',
+            '../plugins/http.js',
+        ],
+    );
+    assert.deepEqual(
+        inspectSourceImports(
+            '/workspace',
+            '/workspace/src',
+            '/workspace/src/reporting/report.ts',
+            sourceFile,
+        ),
+        [
+            'src/reporting/report.ts:3:13 reporting modules must not import the plugins layer.',
+        ],
+    );
+});
+
 test('nonliteral dynamic imports fail closed in source modules', () => {
     const sourceFile = parse(`
         const moduleName = "../plugins/http.js";
