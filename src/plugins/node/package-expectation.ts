@@ -1,7 +1,7 @@
-import { access } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { SmokeError } from '../../errors.js';
+import { pathExists } from '../../shared/fs.js';
 import { getBinTarget } from './bin.js';
 import {
     getExportEntry,
@@ -68,7 +68,7 @@ export function createNpmPackageExpectation(
             }
 
             const packageBinPath = join(packageRoot, binTarget);
-            if (!await exists(packageBinPath)) {
+            if (!await pathExists(packageBinPath)) {
                 throw new SmokeError(`Expected package bin target to exist: ${binName}`, {
                     packageName,
                     packageRoot,
@@ -79,7 +79,7 @@ export function createNpmPackageExpectation(
             }
 
             const installedBinPath = join(fixtureRoot, 'node_modules', '.bin', binName);
-            if (!await exists(installedBinPath)) {
+            if (!await pathExists(installedBinPath)) {
                 throw new SmokeError(`Expected installed package bin to exist: ${binName}`, {
                     packageName,
                     packageRoot,
@@ -100,7 +100,7 @@ export function createNpmPackageExpectation(
                     continue;
                 }
 
-                if (!await exists(join(packageRoot, typePath))) {
+                if (!await pathExists(join(packageRoot, typePath))) {
                     throw new SmokeError(`Expected package ${packageName} type declaration to exist for ${subpath}`, {
                         packageName,
                         packageRoot,
@@ -122,13 +122,4 @@ export function createNpmPackageExpectation(
             }
         },
     };
-}
-
-async function exists(path: string): Promise<boolean> {
-    try {
-        await access(path);
-        return true;
-    } catch {
-        return false;
-    }
 }

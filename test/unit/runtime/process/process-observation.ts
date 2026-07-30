@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import type { Server } from 'node:net';
 import { createServer } from 'node:net';
+import { setTimeout as sleep } from 'node:timers/promises';
 
 export function isProcessAlive(pid: number | undefined): boolean {
     if (pid === undefined) {
@@ -32,12 +33,6 @@ export async function reserveFreePort(): Promise<number> {
     assert.ok(address !== null && typeof address !== 'string');
     await close(server);
     return address.port;
-}
-
-async function sleep(ms: number): Promise<void> {
-    await new Promise((resolve) => {
-        setTimeout(resolve, ms);
-    });
 }
 
 async function listen(server: Server): Promise<void> {

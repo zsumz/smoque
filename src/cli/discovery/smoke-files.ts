@@ -2,6 +2,7 @@ import { readdir, realpath } from 'node:fs/promises';
 import { relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
+import { isNotFoundError } from '../../shared/fs.js';
 import { normalizePath } from '../path.js';
 import { registerBundledRuntimeResolver } from './bundled-runtime-resolver.js';
 
@@ -96,7 +97,7 @@ async function realPathIfExists(path: string): Promise<string | undefined> {
     try {
         return normalizePath(await realpath(path));
     } catch (error) {
-        if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT') {
+        if (isNotFoundError(error)) {
             return undefined;
         }
         throw error;

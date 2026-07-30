@@ -1,4 +1,5 @@
 import type { ChildProcess } from 'node:child_process';
+import { setTimeout as sleep } from 'node:timers/promises';
 
 import { parseDuration } from './duration.js';
 import { ProbeTimeoutError, SmokeError } from './errors.js';
@@ -74,8 +75,4 @@ function reservedPortDetails(
 ): { reservedPorts?: Record<string, unknown> } {
     const reservedPorts = reservedPortsFromEnv(options?.env);
     return reservedPorts === undefined ? {} : { reservedPorts };
-}
-
-async function sleep(ms: number): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, ms));
 }

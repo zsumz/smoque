@@ -1,4 +1,7 @@
 import type { ChildProcess } from 'node:child_process';
+import { setTimeout as sleep } from 'node:timers/promises';
+
+import { hasErrorCode } from './shared/errors.js';
 
 export function shouldUseProcessGroup(): boolean {
     return process.platform !== 'win32';
@@ -14,7 +17,7 @@ export function terminateProcessTree(child: ChildProcess, signal: NodeJS.Signals
             process.kill(-child.pid, signal);
             return;
         } catch (error) {
-            if (!isNoSuchProcessError(error)) {
+            if (!hasErrorCode(error, 'ESRCH')) {
                 throw error;
             }
         }
@@ -26,12 +29,4 @@ export function terminateProcessTree(child: ChildProcess, signal: NodeJS.Signals
 export async function forceKillProcessTreeAfter(child: ChildProcess, ms: number): Promise<void> {
     await sleep(ms);
     terminateProcessTree(child, 'SIGKILL');
-}
-
-function isNoSuchProcessError(error: unknown): boolean {
-    return typeof error === 'object' && error !== null && 'code' in error && error.code === 'ESRCH';
-}
-
-async function sleep(ms: number): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, ms));
 }

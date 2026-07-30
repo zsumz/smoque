@@ -1,3 +1,19 @@
+import { access } from 'node:fs/promises';
+
+import { hasErrorCode } from './errors.js';
+
 export function isNotFoundError(error: unknown): boolean {
-    return typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT';
+    return hasErrorCode(error, 'ENOENT');
+}
+
+export async function pathExists(path: string): Promise<boolean> {
+    try {
+        await access(path);
+        return true;
+    } catch (error) {
+        if (isNotFoundError(error)) {
+            return false;
+        }
+        throw error;
+    }
 }

@@ -1,10 +1,10 @@
-import { access, cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { homedir, tmpdir } from 'node:os';
 import { dirname, isAbsolute, parse, relative, resolve } from 'node:path';
 
 import { UnsafePathError } from './errors.js';
 import { pathToString, resolveContextPath, toPathRef } from './path-ref.js';
-import { isNotFoundError } from './shared/fs.js';
+import { pathExists } from './shared/fs.js';
 import type { FileSystemApi, SafeRemoveOptions, WorkDirOptions } from './types/filesystem.js';
 import type { PathRef } from './types/path-ref.js';
 import type { Probe } from './types/probe.js';
@@ -109,16 +109,4 @@ function assertSafeRemove(path: string | PathRef, repoRoot: PathRef, options: Sa
 function isAncestorOf(path: string, child: string): boolean {
     const result = relative(path, child);
     return result !== '' && !result.startsWith('..') && !isAbsolute(result);
-}
-
-async function pathExists(path: string): Promise<boolean> {
-    try {
-        await access(path);
-        return true;
-    } catch (error) {
-        if (isNotFoundError(error)) {
-            return false;
-        }
-        throw error;
-    }
 }

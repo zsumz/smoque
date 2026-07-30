@@ -1,9 +1,9 @@
 import { createHash } from 'node:crypto';
-import { access, readFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 
 import { SmokeError } from '../../errors.js';
 import { pathToString } from '../../path-ref.js';
-import { isNotFoundError } from '../../shared/fs.js';
+import { isNotFoundError, pathExists } from '../../shared/fs.js';
 import type { ChecksumAlgorithm } from '../../types/checksum.js';
 import type { ExecutableOptions } from '../../types/expectations.js';
 import type { PathRef } from '../../types/path-ref.js';
@@ -16,12 +16,12 @@ export function createFileExpectation(path: string | PathRef): FileExpectation {
 
     return {
         async toExist(): Promise<void> {
-            if (!await exists(target)) {
+            if (!await pathExists(target)) {
                 throw new SmokeError(`Expected file to exist: ${target}`, { path: target });
             }
         },
         async notToExist(): Promise<void> {
-            if (await exists(target)) {
+            if (await pathExists(target)) {
                 throw new SmokeError(`Expected file not to exist: ${target}`, { path: target });
             }
         },
@@ -80,18 +80,6 @@ async function readExistingFile(path: string): Promise<string> {
     } catch (error) {
         if (isNotFoundError(error)) {
             throw new SmokeError(`Expected file to exist: ${path}`, { path });
-        }
-        throw error;
-    }
-}
-
-async function exists(path: string): Promise<boolean> {
-    try {
-        await access(path);
-        return true;
-    } catch (error) {
-        if (isNotFoundError(error)) {
-            return false;
         }
         throw error;
     }

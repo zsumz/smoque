@@ -1,3 +1,5 @@
+import { setTimeout as sleep } from 'node:timers/promises';
+
 import { parseDuration } from './duration.js';
 import { ProbeTimeoutError, SmokeError } from './errors.js';
 import type { PollOptions } from './types/probe.js';
@@ -69,8 +71,4 @@ function formatUnknownError(error: unknown): string {
     }
     const serialized = JSON.stringify(error) as string | undefined;
     return serialized ?? Object.prototype.toString.call(error);
-}
-
-async function sleep(ms: number): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, ms));
 }

@@ -1,5 +1,7 @@
 import { writeFile } from 'node:fs/promises';
 
+import { hasErrorCode } from '../../shared/errors.js';
+
 export async function writeTemplateFile(
     path: string,
     content: string,
@@ -9,13 +11,9 @@ export async function writeTemplateFile(
         await writeFile(path, content, { flag: force ? 'w' : 'wx' });
         return 'created';
     } catch (error) {
-        if (isFileExistsError(error)) {
+        if (hasErrorCode(error, 'EEXIST')) {
             return 'exists';
         }
         throw error;
     }
-}
-
-function isFileExistsError(error: unknown): boolean {
-    return typeof error === 'object' && error !== null && 'code' in error && error.code === 'EEXIST';
 }
