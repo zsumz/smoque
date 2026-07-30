@@ -1,7 +1,6 @@
 import { cp, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-import { fileURLToPath } from 'node:url';
 
 import { runProcess, type ProcessResult } from '../process.js';
 import type { MarkdownSnippet } from './markdown-snippets.js';
@@ -24,7 +23,7 @@ export async function runSnippet(snippet: MarkdownSnippet, options: RunSnippetOp
         const smokeFile = resolve(snippetDir, `snippet-${String(snippet.index)}.smoke.${extension}`);
         await writeFile(smokeFile, snippet.code, 'utf8');
 
-        const mainPath = fileURLToPath(new URL('../main.js', import.meta.url));
+        const mainPath = resolve(import.meta.dirname, '../main.js');
         return await runProcess(process.execPath, [mainPath, 'run', smokeFile], root, {
             timeoutMs: options.timeoutMs,
             timeoutLabel: options.timeoutLabel,

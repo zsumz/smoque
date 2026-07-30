@@ -1,6 +1,5 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { inspectPublicApi } from './contract/public-api.mts';
 import { inspectPublicEntrypointContract } from './contract/public-entrypoints.mts';
 import { findDependencyCycles } from './dependency/find-dependency-cycles.mts';
@@ -15,7 +14,7 @@ import {
 import { checkModule } from './module/check-module.mts';
 import { testFilePolicyFailure } from './module/test-file-policy.mts';
 
-const root = fileURLToPath(new URL('../../', import.meta.url));
+const root = path.resolve(import.meta.dirname, '../..');
 const sourceRoot = path.join(root, 'src');
 const testRoot = path.join(root, 'test');
 const scriptsRoot = path.join(root, 'scripts');

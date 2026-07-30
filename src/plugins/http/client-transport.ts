@@ -1,5 +1,6 @@
-import { request as httpRequest } from 'node:http';
+import { request as httpRequest, type IncomingMessage } from 'node:http';
 import { request as httpsRequest } from 'node:https';
+import { text as readText } from 'node:stream/consumers';
 
 import type { HttpRequestOptions } from './client-types.js';
 import { headersToRecord } from './headers.js';
@@ -93,16 +94,7 @@ async function nodeHttpRequest(
 
     return await new Promise<NormalizedHttpResponse>((resolve, reject) => {
         const request = client(parsed, requestOptions, (response) => {
-            const chunks: Uint8Array[] = [];
-            response.on('data', (chunk: Uint8Array) => chunks.push(chunk));
-            response.on('error', reject);
-            response.on('end', () => {
-                resolve({
-                    status: response.statusCode ?? 0,
-                    headers: headersToRecord(response.headers),
-                    body: Buffer.concat(chunks).toString('utf8'),
-                });
-            });
+            void normalizeNodeResponse(response).then(resolve, reject);
         });
 
         request.on('error', reject);
@@ -118,6 +110,14 @@ async function nodeHttpRequest(
         }
         request.end();
     });
+}
+
+async function normalizeNodeResponse(response: IncomingMessage): Promise<NormalizedHttpResponse> {
+    return {
+        status: response.statusCode ?? 0,
+        headers: headersToRecord(response.headers),
+        body: await readText(response),
+    };
 }
 
 function toArrayBuffer(value: Uint8Array): ArrayBuffer {

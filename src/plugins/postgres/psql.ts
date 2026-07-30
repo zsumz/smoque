@@ -47,13 +47,9 @@ export function mergeSqlOptions(defaults: PostgresSqlOptions, options: PostgresS
 
 export function redactUrl(t: SmokeContext, url: string): void {
     t.redact(url);
-    try {
-        const parsed = new URL(url);
-        if (parsed.password) {
-            t.redact(decodeURIComponent(parsed.password));
-        }
-    } catch {
-        return;
+    const parsed = URL.parse(url);
+    if (parsed?.password) {
+        t.redact(decodeURIComponent(parsed.password));
     }
 }
 

@@ -4,6 +4,7 @@ import {
     type Server,
     type ServerResponse,
 } from 'node:http';
+import { text as readText } from 'node:stream/consumers';
 
 import {
     closeServer,
@@ -78,12 +79,5 @@ async function handleFakeRequest(
 }
 
 async function readBody(request: IncomingMessage): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const chunks: Uint8Array[] = [];
-        request.on('data', (chunk: Uint8Array) => chunks.push(chunk));
-        request.on('error', reject);
-        request.on('end', () => {
-            resolve(Buffer.concat(chunks).toString('utf8'));
-        });
-    });
+    return await readText(request);
 }

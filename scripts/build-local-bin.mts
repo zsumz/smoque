@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 import { chmod, mkdir, stat, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const repoRoot = resolve(import.meta.dirname, '..');
 const outputPath = resolve(repoRoot, parseOutputPath(process.argv.slice(2)));
 const cliPath = resolve(repoRoot, 'dist', 'cli', 'main.js');
 
