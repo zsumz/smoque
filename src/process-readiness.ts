@@ -3,7 +3,7 @@ import { setTimeout as sleep } from 'node:timers/promises';
 
 import { parseDuration } from './duration.js';
 import { ProbeTimeoutError, SmokeError } from './errors.js';
-import { reservedPortsFromEnv } from './ports.js';
+import { reservedPortErrorDetails } from './ports.js';
 import type { ManagedProcessHandle } from './process-handle.js';
 import type { ProcessStartOptions } from './types/process.js';
 
@@ -16,7 +16,7 @@ export async function waitForProcessSpawn(
         child.once('spawn', resolve);
         child.once('error', (error) => {
             reject(new SmokeError(`Process failed to start: ${command}`, {
-                ...reservedPortDetails(options),
+                ...reservedPortErrorDetails(options.env),
                 cause: error.message,
             }));
         });
@@ -39,7 +39,7 @@ export async function waitForProcessReady(
         if (handle.exitDetails().exitCode !== null || handle.exitDetails().signal !== null) {
             throw new SmokeError('Process exited before it became ready.', {
                 ready: options.ready?.description,
-                ...reservedPortDetails(options),
+                ...reservedPortErrorDetails(options.env),
                 ...handle.exitDetails(),
             });
         }
@@ -64,15 +64,8 @@ export async function waitForProcessReady(
             timeoutMs,
             attempts,
             lastMessage,
-            ...reservedPortDetails(options),
+            ...reservedPortErrorDetails(options.env),
             ...handle.exitDetails(),
         },
     );
-}
-
-function reservedPortDetails(
-    options: ProcessStartOptions | undefined,
-): { reservedPorts?: Record<string, unknown> } {
-    const reservedPorts = reservedPortsFromEnv(options?.env);
-    return reservedPorts === undefined ? {} : { reservedPorts };
 }

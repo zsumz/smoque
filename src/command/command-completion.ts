@@ -1,6 +1,6 @@
 import { CommandFailedError } from '../errors.js';
-import { reservedPortsFromEnv } from '../ports.js';
-import type { CommandOptions, CommandResult } from '../types/command.js';
+import { reservedPortErrorDetails } from '../ports.js';
+import type { CommandResult } from '../types/command.js';
 import { emitCommandFinished } from './command-events.js';
 import type { RunCommandInput } from './run-command.js';
 
@@ -24,7 +24,7 @@ export async function finishCommand(
             command: input.command,
             args: result.args,
             cwd: result.cwd,
-            ...reservedPortDetails(input.options),
+            ...reservedPortErrorDetails(input.options?.env),
             cause: spawnError.message,
         });
     }
@@ -36,7 +36,7 @@ export async function finishCommand(
             cwd: result.cwd,
             timeout: input.options?.timeout,
             durationMs: result.durationMs,
-            ...reservedPortDetails(input.options),
+            ...reservedPortErrorDetails(input.options?.env),
             stdout: result.stdout,
             stderr: result.stderr,
         });
@@ -51,7 +51,7 @@ export async function finishCommand(
                 cwd: result.cwd,
                 exitCode: result.exitCode,
                 durationMs: result.durationMs,
-                ...reservedPortDetails(input.options),
+                ...reservedPortErrorDetails(input.options?.env),
                 stdout: result.stdout,
                 stderr: result.stderr,
             },
@@ -59,13 +59,6 @@ export async function finishCommand(
     }
 
     return result;
-}
-
-function reservedPortDetails(
-    options: CommandOptions | undefined,
-): { reservedPorts?: Record<string, unknown> } {
-    const reservedPorts = reservedPortsFromEnv(options?.env);
-    return reservedPorts === undefined ? {} : { reservedPorts };
 }
 
 function formatCommand(result: CommandResult): string {

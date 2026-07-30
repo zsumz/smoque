@@ -1,6 +1,9 @@
 import { spawn } from 'node:child_process';
 
-import { shouldUseProcessGroup, terminateProcessTree } from '../process-tree.js';
+import {
+    scheduleProcessTreeTimeout,
+    shouldUseProcessGroup,
+} from '../process-tree.js';
 
 export interface ProcessResult {
     exitCode: number | null;
@@ -30,29 +33,16 @@ export async function runProcess(
         const stdout: Buffer[] = [];
         const stderr: Buffer[] = [];
         let resolved = false;
-        let timedOut = false;
-        let forceKillTimeout: NodeJS.Timeout | undefined;
-        const timeout = options.timeoutMs === undefined
+        const processTimeout = options.timeoutMs === undefined
             ? undefined
-            : setTimeout(() => {
-                timedOut = true;
-                terminateProcessTree(child, 'SIGTERM');
-                forceKillTimeout = setTimeout(() => {
-                    terminateProcessTree(child, 'SIGKILL');
-                }, 500);
-            }, options.timeoutMs);
+            : scheduleProcessTreeTimeout(child, options.timeoutMs);
 
         const finish = (result: ProcessResult): void => {
             if (resolved) {
                 return;
             }
             resolved = true;
-            if (timeout) {
-                clearTimeout(timeout);
-            }
-            if (forceKillTimeout) {
-                clearTimeout(forceKillTimeout);
-            }
+            processTimeout?.cancel();
             resolveProcess(result);
         };
 
@@ -63,6 +53,7 @@ export async function runProcess(
         });
         child.on('close', (exitCode) => {
             const stderrText = Buffer.concat(stderr).toString('utf8');
+            const timedOut = processTimeout?.didExpire() ?? false;
             finish({
                 exitCode,
                 stdout: Buffer.concat(stdout).toString('utf8'),

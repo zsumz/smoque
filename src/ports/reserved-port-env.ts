@@ -25,6 +25,13 @@ export function reservedPortsFromEnv(
     return isReservedPortDetailsMap(value) ? value : undefined;
 }
 
+export function reservedPortErrorDetails(
+    env: Record<string, string | undefined> | undefined,
+): { reservedPorts?: Record<string, unknown> } {
+    const reservedPorts = reservedPortsFromEnv(env);
+    return reservedPorts === undefined ? {} : { reservedPorts };
+}
+
 export function isReservedPort(value: PortEnvValue): value is ReservedPort {
     return typeof value === 'object'
         && value !== null

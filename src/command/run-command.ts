@@ -1,7 +1,10 @@
 import { spawn } from 'node:child_process';
 
 import { parseDuration } from '../duration.js';
-import { shouldUseProcessGroup, terminateProcessTree } from '../process-tree.js';
+import {
+    scheduleProcessTreeTimeout,
+    shouldUseProcessGroup,
+} from '../process-tree.js';
 import { mergeEnv } from '../shared/env.js';
 import { toPathString } from '../shared/path-ref.js';
 import type { SmokeEventSink } from '../events.js';
@@ -43,20 +46,11 @@ export async function runCommand(input: RunCommandInput): Promise<CommandResult>
         });
 
         let spawnError: Error | undefined;
-        let timedOut = false;
-        let timeout: NodeJS.Timeout | undefined;
-        let forceKillTimeout: NodeJS.Timeout | undefined;
 
         const timeoutMs = options.timeout ? parseDuration(options.timeout, 0) : undefined;
-        if (timeoutMs !== undefined) {
-            timeout = setTimeout(() => {
-                timedOut = true;
-                terminateProcessTree(child, 'SIGTERM');
-                forceKillTimeout = setTimeout(() => {
-                    terminateProcessTree(child, 'SIGKILL');
-                }, 500);
-            }, timeoutMs);
-        }
+        const processTimeout = timeoutMs === undefined
+            ? undefined
+            : scheduleProcessTreeTimeout(child, timeoutMs);
 
         if (options.stdin !== undefined && child.stdin) {
             child.stdin.end(options.stdin);
@@ -105,6 +99,7 @@ export async function runCommand(input: RunCommandInput): Promise<CommandResult>
         child.on('close', (exitCode, signal) => {
             const durationMs = Date.now() - startedAt;
             const normalizedExitCode = exitCode ?? (signal ? -1 : 0);
+            const timedOut = processTimeout?.didExpire() ?? false;
             const result: CommandResult = {
                 command: input.command,
                 args,
@@ -115,12 +110,7 @@ export async function runCommand(input: RunCommandInput): Promise<CommandResult>
                 durationMs,
             };
 
-            if (timeout) {
-                clearTimeout(timeout);
-            }
-            if (forceKillTimeout) {
-                clearTimeout(forceKillTimeout);
-            }
+            processTimeout?.cancel();
 
             void finishCommand(input, outputEvents, result, spawnError, timedOut).then(resolve, reject);
         });
