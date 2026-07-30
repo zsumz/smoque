@@ -1,4 +1,4 @@
-import { readdir, realpath } from 'node:fs/promises';
+import { realpath } from 'node:fs/promises';
 import { relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -8,17 +8,7 @@ import {
     normalizeRelativePattern,
 } from '../path.js';
 import { registerBundledRuntimeResolver } from './bundled-runtime-resolver.js';
-
-const ignoredDiscoveryDirectories = new Set([
-    '.git',
-    '.idea',
-    '.tmp',
-    '__MACOSX',
-    'coverage',
-    'dist',
-    'node_modules',
-    'target',
-]);
+import { listDiscoveryFiles } from './discovery-files.js';
 
 export async function discoverSmokeFiles(repoRoot: string, pattern?: string): Promise<string[]> {
     const files = await listSmokeFiles(repoRoot);
@@ -71,21 +61,7 @@ export async function importSmokeFiles(files: string[]): Promise<void> {
 }
 
 async function listSmokeFiles(root: string): Promise<string[]> {
-    const entries = await readdir(root, { withFileTypes: true });
-    const files: string[] = [];
-
-    for (const entry of entries) {
-        if (entry.isDirectory()) {
-            if (ignoredDiscoveryDirectories.has(entry.name)) {
-                continue;
-            }
-            files.push(...await listSmokeFiles(resolve(root, entry.name)));
-        } else if (entry.isFile() && isSmokeFile(entry.name)) {
-            files.push(resolve(root, entry.name));
-        }
-    }
-
-    return files.sort();
+    return await listDiscoveryFiles(root, isSmokeFile);
 }
 
 function isSmokeFile(path: string): boolean {

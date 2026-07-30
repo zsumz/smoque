@@ -45,7 +45,11 @@ test('executable tests use the one supported extension', () => {
 test('the policy scan sees test-like files with arbitrary extensions', async () => {
     const root = await mkdtemp(join(tmpdir(), 'smoque-test-file-policy-'));
     const nested = join(root, 'nested');
-    await mkdir(nested);
+    const hidden = join(root, '.hidden');
+    await Promise.all([
+        mkdir(nested),
+        mkdir(hidden),
+    ]);
     const names = [
         'example.spec.ts',
         'example.test.cts',
@@ -60,11 +64,12 @@ test('the policy scan sees test-like files with arbitrary extensions', async () 
                 await writeFile(join(nested, name), '', 'utf8');
             }),
         );
+        await writeFile(join(hidden, 'hidden.test.tsx'), '', 'utf8');
         const collected = await collectAllFiles(root);
 
         assert.deepEqual(
             collected.map((file) => basename(file)).sort(),
-            names,
+            [...names, 'hidden.test.tsx'].sort(),
         );
     } finally {
         await rm(root, { recursive: true, force: true });

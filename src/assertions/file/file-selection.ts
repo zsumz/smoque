@@ -1,13 +1,15 @@
-import { readdir, stat } from 'node:fs/promises';
-import { relative, resolve } from 'node:path';
+import { relative } from 'node:path';
 
+import { listFilesInTree } from '../../shared/file-tree.js';
 import { escapeRegExp } from '../../shared/text-pattern.js';
 
 export async function listMatchingFiles(
     root: string,
     patterns: readonly string[],
 ): Promise<string[]> {
-    const files = await listFiles(root);
+    const files = await listFilesInTree(root, {
+        includeFileSymlinks: true,
+    });
     if (patterns.length === 0) {
         return files;
     }
@@ -20,27 +22,6 @@ export async function listMatchingFiles(
 
 export function normalizeFilePath(path: string): string {
     return path.replace(/\\/gu, '/');
-}
-
-async function listFiles(root: string): Promise<string[]> {
-    const entries = await readdir(root, { withFileTypes: true });
-    const files: string[] = [];
-
-    for (const entry of entries) {
-        const path = resolve(root, entry.name);
-        if (entry.isDirectory()) {
-            files.push(...await listFiles(path));
-        } else if (entry.isFile()) {
-            files.push(path);
-        } else if (entry.isSymbolicLink()) {
-            const target = await stat(path);
-            if (target.isFile()) {
-                files.push(path);
-            }
-        }
-    }
-
-    return files.sort();
 }
 
 function globToRegExp(pattern: string): RegExp {

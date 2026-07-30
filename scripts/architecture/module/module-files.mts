@@ -1,5 +1,11 @@
-import { readdir } from 'node:fs/promises';
+import { glob, readdir } from 'node:fs/promises';
 import path from 'node:path';
+
+const allEntryPatterns = [
+    '**/*',
+    '**/.*',
+    '**/.*/**/{*,.*}',
+];
 
 export async function collectModuleFiles(directory: string): Promise<string[]> {
     return collectFiles(directory, (name) => name.endsWith('.ts') || name.endsWith('.mts'));
@@ -24,18 +30,18 @@ async function collectFiles(
     directory: string,
     accepts: (name: string) => boolean,
 ): Promise<string[]> {
-    const entries = await readdir(directory, { withFileTypes: true });
+    await readdir(directory);
     const files: string[] = [];
 
-    for (const entry of entries) {
-        const absolute = path.join(directory, entry.name);
-        if (entry.isDirectory()) {
-            files.push(...await collectFiles(absolute, accepts));
-        } else if (entry.isFile() && accepts(entry.name)) {
-            files.push(absolute);
+    for await (const entry of glob(allEntryPatterns, {
+        cwd: directory,
+        withFileTypes: true,
+    })) {
+        if (entry.isFile() && accepts(entry.name)) {
+            files.push(path.join(entry.parentPath, entry.name));
         }
     }
-    return files;
+    return files.sort();
 }
 
 export function relativePath(root: string, file: string): string {
