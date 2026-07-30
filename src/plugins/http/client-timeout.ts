@@ -1,7 +1,9 @@
+const maximumTimerDelayMs = 2_147_483_647;
+
 export function createHttpTimeoutSignal(value: string | undefined): AbortSignal | undefined {
-    return value === undefined
+    return !value
         ? undefined
-        : AbortSignal.timeout(parseHttpDuration(value));
+        : AbortSignal.timeout(normalizeTimerDelay(parseHttpDuration(value)));
 }
 
 export function preserveHttpTimeoutError(
@@ -34,4 +36,10 @@ export function parseHttpDuration(value: string): number {
 
 function isTimeoutError(error: unknown): error is DOMException {
     return error instanceof DOMException && error.name === 'TimeoutError';
+}
+
+function normalizeTimerDelay(value: number): number {
+    return Number.isFinite(value) && value >= 1 && value <= maximumTimerDelayMs
+        ? value
+        : 1;
 }
