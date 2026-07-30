@@ -1,7 +1,13 @@
 import ts from 'typescript';
+import {
+    isDynamicImportCall,
+    literalDynamicImportSpecifier,
+    literalImportEqualsSpecifier,
+    literalImportTypeSpecifier,
+} from './static-module-specifiers.mts';
 
 export interface StaticModuleReference {
-    kind: 'import' | 'export' | 'import-type' | 'dynamic-import';
+    kind: 'import' | 'export' | 'import-equals' | 'import-type' | 'dynamic-import';
     node: ts.Node;
     specifier: string;
     typeOnly: boolean;
@@ -30,6 +36,18 @@ export function collectStaticModuleReferences(
                 typeOnly: isTypeOnlyExport(node),
             });
             return;
+        }
+        if (ts.isImportEqualsDeclaration(node)) {
+            const importEqualsSpecifier = literalImportEqualsSpecifier(node);
+            if (importEqualsSpecifier !== undefined) {
+                references.push({
+                    kind: 'import-equals',
+                    node,
+                    specifier: importEqualsSpecifier.text,
+                    typeOnly: node.isTypeOnly,
+                });
+                return;
+            }
         }
         const importTypeSpecifier = literalImportTypeSpecifier(node);
         if (importTypeSpecifier !== undefined) {
@@ -113,36 +131,4 @@ function isTypeOnlyExport(statement: ts.ExportDeclaration): boolean {
         && ts.isNamedExports(statement.exportClause)
         && statement.exportClause.elements.length > 0
         && statement.exportClause.elements.every((specifier) => specifier.isTypeOnly);
-}
-
-function literalImportTypeSpecifier(
-    node: ts.Node,
-): ts.StringLiteral | undefined {
-    if (!ts.isImportTypeNode(node) || !ts.isLiteralTypeNode(node.argument)) {
-        return undefined;
-    }
-    return ts.isStringLiteral(node.argument.literal)
-        ? node.argument.literal
-        : undefined;
-}
-
-function literalDynamicImportSpecifier(
-    node: ts.Node,
-): ts.StringLiteral | undefined {
-    if (
-        !isDynamicImportCall(node)
-        || node.arguments.length < 1
-        || node.arguments.length > 2
-    ) {
-        return undefined;
-    }
-    const specifier = node.arguments[0];
-    return specifier !== undefined && ts.isStringLiteral(specifier)
-        ? specifier
-        : undefined;
-}
-
-function isDynamicImportCall(node: ts.Node): node is ts.CallExpression {
-    return ts.isCallExpression(node)
-        && node.expression.kind === ts.SyntaxKind.ImportKeyword;
 }

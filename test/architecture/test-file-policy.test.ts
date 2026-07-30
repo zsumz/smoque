@@ -34,6 +34,12 @@ test('executable tests use the one supported extension', () => {
         testFilePolicyFailure('test/unit/example-fixture.mts'),
         undefined,
     );
+    for (const relative of [
+        'test/unit/__snapshots__/runner.test.ts.snap',
+        'test/unit/runner.spec.ts.snap',
+    ]) {
+        assert.equal(testFilePolicyFailure(relative), undefined);
+    }
 });
 
 test('the policy scan sees test-like files with arbitrary extensions', async () => {

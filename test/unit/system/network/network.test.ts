@@ -2,7 +2,30 @@ import assert from 'node:assert/strict';
 import { test } from 'vitest';
 
 import { SmokeError } from '../../../../dist/errors.js';
-import { assertNetworkAllowed, createNetApi } from '../../../../dist/network.js';
+import {
+    assertNetworkAllowed,
+    createNetApi,
+    isLocalHost,
+} from '../../../../dist/network.js';
+
+test('local host detection requires a local name or numeric address', () => {
+    for (const host of [
+        'localhost',
+        '127.0.0.1',
+        '127.255.255.254',
+        '::1',
+        '[::1]',
+        '0.0.0.0',
+    ]) {
+        assert.equal(isLocalHost(host), true, host);
+    }
+    for (const host of [
+        '127.attacker.example',
+        '127.0.0.1.attacker.example',
+    ]) {
+        assert.equal(isLocalHost(host), false, host);
+    }
+});
 
 test('network policy blocks external hosts and allows configured hosts', () => {
     const context = {};
@@ -33,4 +56,15 @@ test('network policy blocks external hosts and allows configured hosts', () => {
             return true;
         },
     );
+    for (const host of [
+        '127.attacker.example',
+        '127.0.0.1.attacker.example',
+    ]) {
+        assert.throws(
+            () => {
+                assertNetworkAllowed(context, 'GET', `https://${host}/health`);
+            },
+            /Blocked external network request/u,
+        );
+    }
 });

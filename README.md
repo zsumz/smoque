@@ -23,7 +23,8 @@ npx smoque init
 npx smoque run smoke/
 ```
 
-`init` creates a `smoke/` folder and a starter smoke file.
+`init` creates `smoke/project.smoke.ts`, `smoke/AGENTS.md`,
+`smoke/package.json`, and `smoke/tsconfig.json`.
 
 ## Example
 

@@ -1,3 +1,5 @@
+import { isIP } from 'node:net';
+
 import { SmokeError } from './errors.js';
 import type { NetApi, NetworkPolicyOptions } from './types/network.js';
 
@@ -64,11 +66,15 @@ function normalizeHosts(input: string | string[] | undefined): string[] {
 }
 
 export function isLocalHost(host: string): boolean {
-    return (
-        host === 'localhost' ||
-    host === '::1' ||
-    host === '[::1]' ||
-    host === '0.0.0.0' ||
-    host.startsWith('127.')
-    );
+    const normalized = host.startsWith('[') && host.endsWith(']')
+        ? host.slice(1, -1)
+        : host;
+    if (
+        normalized === 'localhost'
+        || normalized === '::1'
+        || normalized === '0.0.0.0'
+    ) {
+        return true;
+    }
+    return isIP(normalized) === 4 && normalized.startsWith('127.');
 }

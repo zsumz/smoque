@@ -2,7 +2,9 @@ import assert from 'node:assert/strict';
 import { beforeEach, test } from 'vitest';
 
 import { resetSmokeRegistry, runRegisteredSuites, smoke } from '../../../../dist/core.js';
+import { SmokeError } from '../../../../dist/errors.js';
 import httpPlugin from '../../../../dist/plugins/http.js';
+import { normalizeTlsOptions } from '../../../../dist/plugins/http/tls.js';
 
 beforeEach(() => {
     resetSmokeRegistry();
@@ -63,4 +65,27 @@ test('http TLS options still honor external network policy', async () => {
         result.suites[0]?.error?.message ?? '',
         /Blocked external network request/u,
     );
+});
+
+test('self-signed TLS rejects deceptive loopback-like hostnames', async () => {
+    for (const host of [
+        '127.attacker.example',
+        '127.0.0.1.attacker.example',
+    ]) {
+        await assert.rejects(
+            normalizeTlsOptions(
+                new URL(`https://${host}/health`),
+                { selfSigned: true },
+            ),
+            (error) => {
+                assert.ok(error instanceof SmokeError);
+                assert.match(
+                    error.message,
+                    /Self-signed TLS mode is only allowed for local hosts/u,
+                );
+                assert.equal(error.details?.host, host);
+                return true;
+            },
+        );
+    }
 });
