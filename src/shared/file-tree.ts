@@ -1,11 +1,5 @@
-import { glob, readdir, stat } from 'node:fs/promises';
+import { readdir, stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
-
-const allEntryPatterns = [
-    '**/*',
-    '**/.*',
-    '**/.*/**/{*,.*}',
-];
 
 export interface FileTreeOptions {
     excludeDirectoryNames?: ReadonlySet<string>;
@@ -16,23 +10,30 @@ export async function listFilesInTree(
     root: string,
     options: FileTreeOptions = {},
 ): Promise<string[]> {
-    await readdir(root);
     const files: string[] = [];
-    const entries = glob(allEntryPatterns, {
-        cwd: root,
-        withFileTypes: true,
-        exclude: (entry) =>
-            entry.isDirectory() &&
-            options.excludeDirectoryNames?.has(entry.name) === true,
-    });
+    await collectFiles(resolve(root), files, options);
+    return files.sort();
+}
 
-    for await (const entry of entries) {
-        const path = resolve(entry.parentPath, entry.name);
+async function collectFiles(
+    directory: string,
+    files: string[],
+    options: FileTreeOptions,
+): Promise<void> {
+    const entries = await readdir(directory, { withFileTypes: true });
+
+    for (const entry of entries) {
+        const path = resolve(directory, entry.name);
+        if (entry.isDirectory()) {
+            if (options.excludeDirectoryNames?.has(entry.name) !== true) {
+                await collectFiles(path, files, options);
+            }
+            continue;
+        }
         if (entry.isFile() || await isIncludedFileSymlink(path, entry.isSymbolicLink(), options)) {
             files.push(path);
         }
     }
-    return files.sort();
 }
 
 async function isIncludedFileSymlink(

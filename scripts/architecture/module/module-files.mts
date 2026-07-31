@@ -1,11 +1,5 @@
-import { glob, readdir } from 'node:fs/promises';
+import { readdir } from 'node:fs/promises';
 import path from 'node:path';
-
-const allEntryPatterns = [
-    '**/*',
-    '**/.*',
-    '**/.*/**/{*,.*}',
-];
 
 export async function collectModuleFiles(directory: string): Promise<string[]> {
     return collectFiles(directory, (name) => name.endsWith('.ts') || name.endsWith('.mts'));
@@ -30,18 +24,26 @@ async function collectFiles(
     directory: string,
     accepts: (name: string) => boolean,
 ): Promise<string[]> {
-    await readdir(directory);
     const files: string[] = [];
+    await collectAcceptedFiles(directory, accepts, files);
+    return files.sort();
+}
 
-    for await (const entry of glob(allEntryPatterns, {
-        cwd: directory,
-        withFileTypes: true,
-    })) {
-        if (entry.isFile() && accepts(entry.name)) {
-            files.push(path.join(entry.parentPath, entry.name));
+async function collectAcceptedFiles(
+    directory: string,
+    accepts: (name: string) => boolean,
+    files: string[],
+): Promise<void> {
+    const entries = await readdir(directory, { withFileTypes: true });
+
+    for (const entry of entries) {
+        const entryPath = path.join(directory, entry.name);
+        if (entry.isDirectory()) {
+            await collectAcceptedFiles(entryPath, accepts, files);
+        } else if (entry.isFile() && accepts(entry.name)) {
+            files.push(entryPath);
         }
     }
-    return files.sort();
 }
 
 export function relativePath(root: string, file: string): string {
