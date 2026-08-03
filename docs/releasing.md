@@ -7,8 +7,8 @@ GitHub Release.
 ## One-time setup
 
 Create the `npm-stage` and `github-release` GitHub environments. Restrict
-`npm-stage` to version tags and configure it as the environment for the npm
-trusted publisher:
+`npm-stage` to version tags and `github-release` to `main`. Configure
+`npm-stage` as the environment for the npm trusted publisher:
 
 - owner: `zsumz`
 - repository: `smoque`
@@ -66,8 +66,9 @@ npm stage approve <stage-id>
 
 Run the `Finalize release` workflow with the approved stable version. It
 requires `latest` to point to that version, downloads and smokes the public
-registry tarball, and creates the GitHub Release from the existing signed tag
-and committed release notes.
+registry tarball, verifies its registry signature and provenance attestation,
+and creates the GitHub Release from the existing signed tag and committed
+release notes.
 
 Confirm the npm version, dist-tag, integrity, provenance, GitHub Release, and
 remote tag before announcing completion.

@@ -1,17 +1,12 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import {
-    releaseContractFailures,
-    releaseSignerEmail,
-    releaseSignerFingerprint,
-    releaseSignerName,
-    type ReleaseMetadata,
-} from './release-contract.mts';
+import { type ReleaseMetadata } from './release-contract.mts';
 import {
     releaseCommandSucceeds,
     runReleaseCommand,
 } from './release-command.mts';
+import { releaseVerificationFailures } from './release-verification.mts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const tag = process.argv[2];
@@ -32,36 +27,28 @@ const metadata: ReleaseMetadata = {
     lockRootName: readString(lockRoot, 'name'),
     lockRootVersion: readString(lockRoot, 'version'),
 };
-const failures = releaseContractFailures(metadata);
-
-if (gitOutput(['cat-file', '-t', `refs/tags/${tag}`]) !== 'tag') {
-    failures.push(`${tag} must be an annotated tag.`);
-}
+const tagType = gitOutput(['cat-file', '-t', `refs/tags/${tag}`]);
 const tagger = gitOutput([
     'for-each-ref',
     '--format=%(taggername)%00%(taggeremail)',
     `refs/tags/${tag}`,
 ]);
-if (tagger !== `${releaseSignerName}\u0000<${releaseSignerEmail}>`) {
-    failures.push(`${tag} must be tagged by ${releaseSignerName} <${releaseSignerEmail}>.`);
-}
-const signature = runReleaseCommand('git', ['verify-tag', '--raw', tag], root);
-const signatureOutput = `${signature.stdout}\n${signature.stderr}`;
-if (!signatureOutput.includes(`VALIDSIG ${releaseSignerFingerprint} `)) {
-    failures.push(`${tag} must use the pinned release signing key.`);
-}
+const signatureOutput = gitTagSignature(tag);
 const commit = gitOutput(['rev-list', '-n', '1', tag]);
-if (!releaseCommandSucceeds(
+const commitOnMain = releaseCommandSucceeds(
     'git',
     ['merge-base', '--is-ancestor', commit, 'origin/main'],
     root,
-)) {
-    failures.push(`${tag} must point to a commit on origin/main.`);
-}
+);
 const notes = path.join(root, 'docs', 'releases', `${tag}.md`);
-if (!await fileHasContent(notes)) {
-    failures.push(`docs/releases/${tag}.md must contain release notes.`);
-}
+const failures = releaseVerificationFailures({
+    metadata,
+    tagType,
+    tagger,
+    signatureOutput,
+    commitOnMain,
+    releaseNotesPresent: await fileHasContent(notes),
+});
 
 if (failures.length > 0) {
     throw new Error(`Release verification failed:\n- ${failures.join('\n- ')}`);
@@ -85,6 +72,19 @@ function readString(value: unknown, key: string): string | undefined {
 
 function gitOutput(args: readonly string[]): string {
     return runReleaseCommand('git', args, root).stdout.trim();
+}
+
+function gitTagSignature(releaseTag: string): string {
+    try {
+        const signature = runReleaseCommand(
+            'git',
+            ['verify-tag', '--raw', releaseTag],
+            root,
+        );
+        return `${signature.stdout}\n${signature.stderr}`;
+    } catch {
+        return '';
+    }
 }
 
 async function fileHasContent(file: string): Promise<boolean> {

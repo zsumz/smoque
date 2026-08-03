@@ -1,7 +1,17 @@
-import { access, appendFile } from 'node:fs/promises';
+import {
+    access,
+    appendFile,
+    mkdtemp,
+    rm,
+    writeFile,
+} from 'node:fs/promises';
 import path from 'node:path';
 import { releasePackageName, isStableReleaseVersion } from './release-contract.mts';
 import { runReleaseCommand } from './release-command.mts';
+import {
+    provenanceVerificationFailures,
+    registryStateFailures,
+} from './release-registry.mts';
 
 const version = process.argv[2];
 const outputDirectory = process.argv[3];
@@ -18,12 +28,15 @@ const published = npmOutput([
     `${releasePackageName}@${version}`,
     'version',
 ]);
-if (published !== version) {
-    throw new Error(`npm returned ${published || 'no version'} for ${releasePackageName}@${version}.`);
-}
 const latest = npmOutput(['view', releasePackageName, 'dist-tags.latest']);
-if (latest !== version) {
-    throw new Error(`npm latest is ${latest || 'unset'}, expected ${version}.`);
+const stateFailures = registryStateFailures({
+    packageName: releasePackageName,
+    expectedVersion: version,
+    publishedVersion: published,
+    latestVersion: latest,
+});
+if (stateFailures.length > 0) {
+    throw new Error(stateFailures.join('\n'));
 }
 runReleaseCommand('npm', [
     'pack',
@@ -39,6 +52,7 @@ const tarball = path.resolve(
     `${releasePackageName}-${version}.tgz`,
 );
 await access(tarball);
+await verifyProvenance(version, outputDirectory);
 
 const githubOutput = process.env.GITHUB_OUTPUT;
 if (githubOutput === undefined) {
@@ -50,4 +64,47 @@ console.log(`Verified npm registry state for ${releasePackageName}@${version}.`)
 
 function npmOutput(args: readonly string[]): string {
     return runReleaseCommand('npm', args, process.cwd()).stdout.trim();
+}
+
+async function verifyProvenance(
+    releaseVersion: string,
+    outputRoot: string,
+): Promise<void> {
+    const auditRoot = await mkdtemp(path.join(outputRoot, 'smoque-audit-'));
+    const cache = path.join(auditRoot, '.npm-cache');
+    try {
+        await writeFile(
+            path.join(auditRoot, 'package.json'),
+            `${JSON.stringify({
+                private: true,
+                dependencies: { [releasePackageName]: releaseVersion },
+            }, null, 2)}\n`,
+        );
+        runReleaseCommand('npm', [
+            'install',
+            '--ignore-scripts',
+            '--no-audit',
+            '--no-fund',
+            '--cache',
+            cache,
+        ], auditRoot);
+        const audit = runReleaseCommand('npm', [
+            'audit',
+            'signatures',
+            '--json',
+            '--include-attestations',
+            '--cache',
+            cache,
+        ], auditRoot);
+        const failures = provenanceVerificationFailures(
+            JSON.parse(audit.stdout) as unknown,
+            releasePackageName,
+            releaseVersion,
+        );
+        if (failures.length > 0) {
+            throw new Error(failures.join('\n'));
+        }
+    } finally {
+        await rm(auditRoot, { recursive: true, force: true });
+    }
 }

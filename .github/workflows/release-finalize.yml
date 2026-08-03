@@ -11,6 +11,9 @@ on:
 permissions:
   contents: read
 
+env:
+  SMOQUE_RELEASE_VERSION: ${{ inputs.version }}
+
 concurrency:
   group: npm-release
   cancel-in-progress: false
@@ -22,10 +25,17 @@ jobs:
     timeout-minutes: 15
 
     steps:
+      - name: Validate release input
+        run: |
+          if [[ ! "$SMOQUE_RELEASE_VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "::error::Release version must be a stable semantic version."
+            exit 1
+          fi
+
       - name: Check out signed tag
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          ref: v${{ inputs.version }}
+          ref: v${{ env.SMOQUE_RELEASE_VERSION }}
           fetch-depth: 0
           persist-credentials: false
 
@@ -37,7 +47,7 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Set up release npm
-        run: npm install --global npm@11.19.0
+        run: npm install --global --ignore-scripts npm@11.19.0
 
       - name: Verify signed release
         env:
@@ -46,20 +56,20 @@ jobs:
           install -d -m 700 "$GNUPGHOME"
           gpg --batch --import etc/release-signing-key.asc
           git fetch --no-tags origin main:refs/remotes/origin/main
-          node scripts/release/verify-release.mts "v${{ inputs.version }}"
+          node scripts/release/verify-release.mts "v$SMOQUE_RELEASE_VERSION"
 
       - name: Verify public registry package
         id: package
         run: |
           node scripts/release/verify-registry.mts \
-            "${{ inputs.version }}" \
+            "$SMOQUE_RELEASE_VERSION" \
             "$RUNNER_TEMP"
 
       - name: Smoke public registry tarball
         run: |
           node scripts/release/smoke-release-package.mts \
             "${{ steps.package.outputs.tarball }}" \
-            "${{ inputs.version }}"
+            "$SMOQUE_RELEASE_VERSION"
 
   # Only this job can write repository contents; it runs no repository scripts.
   publish:
@@ -75,13 +85,13 @@ jobs:
       - name: Check out signed tag
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          ref: v${{ inputs.version }}
+          ref: v${{ env.SMOQUE_RELEASE_VERSION }}
           persist-credentials: false
 
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: v${{ inputs.version }}
+          TAG: v${{ env.SMOQUE_RELEASE_VERSION }}
         run: |
           gh release create "$TAG" \
             --verify-tag \

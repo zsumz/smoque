@@ -15,17 +15,24 @@ export function runReleaseCommand(
         encoding: 'utf8',
         env: process.env,
     });
+    const stdout = commandOutput(result.stdout);
+    const stderr = commandOutput(result.stderr);
     if (result.status !== 0) {
         throw new Error([
             `Release command failed: ${command} ${args.join(' ')}`,
-            result.stdout.trim(),
-            result.stderr.trim(),
+            result.error?.message,
+            stdout.trim(),
+            stderr.trim(),
         ].filter(Boolean).join('\n'));
     }
     return {
-        stdout: result.stdout,
-        stderr: result.stderr,
+        stdout,
+        stderr,
     };
+}
+
+function commandOutput(value: unknown): string {
+    return typeof value === 'string' ? value : '';
 }
 
 export function releaseCommandSucceeds(

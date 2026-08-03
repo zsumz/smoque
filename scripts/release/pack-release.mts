@@ -2,6 +2,7 @@ import { appendFile, readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { runReleaseCommand } from './release-command.mts';
+import { readPackFilename } from './release-package.mts';
 
 const outputDirectory = process.argv[2];
 if (outputDirectory === undefined) {
@@ -31,20 +32,4 @@ if (githubOutput === undefined) {
     console.log(output.trim());
 } else {
     await appendFile(githubOutput, output);
-}
-
-function readPackFilename(value: unknown): string {
-    if (!Array.isArray(value) || value.length !== 1) {
-        throw new Error('npm pack must return exactly one package.');
-    }
-    const entry: unknown = value[0];
-    if (
-        typeof entry !== 'object'
-        || entry === null
-        || !('filename' in entry)
-        || typeof entry.filename !== 'string'
-    ) {
-        throw new Error('npm pack did not return a package filename.');
-    }
-    return entry.filename;
 }
