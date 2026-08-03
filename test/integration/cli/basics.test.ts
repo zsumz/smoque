@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'vitest';
@@ -9,11 +9,19 @@ test('smoque --version prints the package version', async () => {
     const root = await mkdtemp(join(tmpdir(), 'smoque-cli-version-'));
 
     try {
+        const packageJson = JSON.parse(await readFile(
+            new URL('../../../package.json', import.meta.url),
+            'utf8',
+        )) as { version?: unknown };
+        const expectedVersion = packageJson.version;
+        if (typeof expectedVersion !== 'string') {
+            throw new Error('package.json must contain a version.');
+        }
         const result = await runCli(['--version'], root);
 
         assert.equal(result.exitCode, 0, cliResultSummary(result));
         assert.equal(result.stderr, '');
-        assert.match(result.stdout, /^0\.1\.0\n$/u);
+        assert.equal(result.stdout, `${expectedVersion}\n`);
     } finally {
         await rm(root, { recursive: true, force: true });
     }
