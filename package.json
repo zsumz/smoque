@@ -1,6 +1,6 @@
 {
   "name": "smoque",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Script-first smoke tests for real project behavior.",
   "author": "zsumz <shawn@zsumz.com>",
   "repository": {
@@ -48,6 +48,16 @@
   "publishConfig": {
     "access": "public"
   },
+  "sallyport": {
+    "requiredStatusChecks": [
+      "Validate Linux / Node 22.x",
+      "Validate Linux / Node 24.x",
+      "Validate Linux / Node 26.x",
+      "Validate macOS / Node 22.x",
+      "Windows build contract (experimental)",
+      "Coverage gate"
+    ]
+  },
   "scripts": {
     "clean": "node scripts/clean-dist.mts",
     "build": "npm run clean && tsc -p tsconfig.json",
@@ -65,9 +75,11 @@
     "archive:source": "git archive --format=tar.gz --output smoque-source.tgz HEAD",
     "bin:local": "npm run build && node scripts/build-local-bin.mts",
     "prepack": "npm run build",
-    "release:check": "npm run validate && npm run coverage:check && npm publish --dry-run --access public --json",
+    "release:check": "npm run validate && npm run coverage:check && npm pack --dry-run --json",
+    "release:smoke": "node scripts/release/smoke-release-package.mts",
     "validate:compat": "npm run typecheck && npm run lint && npm run architecture:check && npm test && npm run smoke:list && node dist/cli/main.js run smoke/ --skip-tag package && npm run smoke:examples && npm pack --dry-run --json",
-    "validate": "npm run typecheck && npm run lint && npm run architecture:check && npm test && npm run smoke:list && npm run smoke && npm run smoke:examples && npm pack --dry-run --json"
+    "validate": "npm run typecheck && npm run lint && npm run architecture:check && npm test && npm run smoke:list && npm run smoke && npm run smoke:examples && npm pack --dry-run --json",
+    "prepublishOnly": "node -e \"throw new Error('Publish smoque only through .github/workflows/sallyport.yml.')\""
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
