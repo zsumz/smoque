@@ -3,36 +3,33 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { test } from 'vitest';
 
-const finalizeWorkflow = fileURLToPath(new URL(
-    '../../.github/workflows/release-finalize.yml',
-    import.meta.url,
-));
-const stageWorkflow = fileURLToPath(new URL(
-    '../../.github/workflows/release.yml',
+const callerWorkflow = fileURLToPath(new URL(
+    '../../.github/workflows/sallyport.yml',
     import.meta.url,
 ));
 
-test('staged publishing requires provenance', async () => {
-    const workflow = await readFile(stageWorkflow, 'utf8');
+test('sallyport workflows use one immutable implementation', async () => {
+    const workflow = await readFile(callerWorkflow, 'utf8');
+    const references = [...workflow.matchAll(
+        /uses: zsumz\/sallyport\/\.github\/workflows\/(?:stage|finalize)\.yml@([0-9a-f]{40})/gu,
+    )];
 
-    assert.match(
-        workflow,
-        /npm stage publish \\\n(?:\s+.*\\\n)+\s+--provenance/u,
-    );
+    assert.equal(references.length, 2);
+    assert.equal(references[0]?.[1], references[1]?.[1]);
 });
 
-test('manual release input crosses one environment boundary', async () => {
-    const workflow = await readFile(finalizeWorkflow, 'utf8');
-    const directInput = '${{ inputs.version }}';
-    const occurrences = workflow.split(directInput).length - 1;
+test('the caller exposes only least-privilege release authority', async () => {
+    const workflow = await readFile(callerWorkflow, 'utf8');
 
-    assert.equal(occurrences, 1);
+    assert.match(workflow, /^permissions: \{\}$/mu);
     assert.match(
         workflow,
-        /SMOQUE_RELEASE_VERSION: \$\{\{ inputs\.version \}\}/u,
+        /stage:\n(?:.*\n)*? {6}actions: read\n {6}contents: read\n {6}id-token: write\n/u,
     );
     assert.match(
         workflow,
-        /node scripts\/release\/verify-release\.mts "v\$SMOQUE_RELEASE_VERSION"/u,
+        /finalize:\n(?:.*\n)*? {6}actions: read\n {6}contents: write\n/u,
     );
+    assert.doesNotMatch(workflow, /secrets:\s+inherit/u);
+    assert.doesNotMatch(workflow, /npm (?:publish|stage)/u);
 });

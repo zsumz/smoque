@@ -1,37 +1,17 @@
 # Releasing smoque
 
-Releases are built by GitHub Actions, staged privately on npm, approved with
-maintainer 2FA, verified from the public registry, and then published as a
-GitHub Release.
-
-## One-time setup
-
-Create the `npm-stage` and `github-release` GitHub environments. Restrict
-`npm-stage` to version tags and `github-release` to `main`. Configure
-`npm-stage` as the environment for the npm trusted publisher:
-
-- owner: `zsumz`
-- repository: `smoque`
-- workflow: `release.yml`
-- environment: `npm-stage`
-- allowed action: `npm stage publish` only
-
-In npm package settings, require two-factor authentication, disallow token
-publishing, and remove obsolete automation tokens. Enable immutable GitHub
-Releases when the repository setting is available.
-
-Protect `main` with required CI, signed commits, linear history, and blocked
-force pushes. Create an active `v*` tag ruleset that restricts creation,
-updates, and deletion, with only the release maintainer allowed to bypass it.
+smoque releases through Sallyport: GitHub stages exact package bytes, a
+maintainer approves them with npm 2FA, and a separate workflow verifies the
+public package before creating an immutable GitHub Release.
 
 ## Prepare
 
 1. Start from a clean, current `main`.
 2. Update `package.json` and `package-lock.json` to the same stable version.
 3. Add concise notes at `docs/releases/v<version>.md`.
-4. Run `npm run release:check`.
+4. Run `npm run release:check` and `npx sallyport check --remote`.
 5. Commit as `chore(release): v<version>` with the configured OpenPGP key.
-6. Push `main` and wait for the complete CI matrix.
+6. Push and require the complete CI matrix.
 
 ## Stage
 
@@ -42,21 +22,23 @@ git tag --sign v<version> -m "smoque v<version>"
 git push origin v<version>
 ```
 
-The `Stage release` workflow verifies the tag, signer, package metadata,
-release notes, and `main` ancestry. It reruns the release gate, packs and
-smokes one tarball, and uploads that exact tarball with `npm stage publish`.
-The workflow cannot publish directly.
+The generated caller invokes Sallyport at one immutable commit. Package code
+runs without OIDC, the tarball is sealed and smoked by artifact ID, and the
+credential-bearing job runs no smoque or Sallyport checkout.
+
+Record the stage ID and candidate run ID from the workflow summary.
 
 ## Approve
 
-Review the staged package on npmjs.com or with:
+Inspect and download the staged package:
 
 ```sh
 npm stage view <stage-id>
 npm stage download <stage-id>
 ```
 
-Approve the staged tarball with maintainer 2FA:
+Compare its SHA-256 with `candidate.json`, smoke the downloaded tarball, then
+approve with maintainer 2FA:
 
 ```sh
 npm stage approve <stage-id>
@@ -64,11 +46,15 @@ npm stage approve <stage-id>
 
 ## Finalize
 
-Run the `Finalize release` workflow with the approved stable version. It
-requires `latest` to point to that version, downloads and smokes the public
-registry tarball, verifies its registry signature and provenance attestation,
-and creates the GitHub Release from the existing signed tag and committed
-release notes.
+Run the generated finalizer with the candidate run ID:
 
-Confirm the npm version, dist-tag, integrity, provenance, GitHub Release, and
-remote tag before announcing completion.
+```sh
+gh workflow run sallyport.yml -f candidate_run_id=<run-id>
+```
+
+The finalizer verifies npm bytes, integrity, signature, provenance, dist-tag,
+tag object, signer, and release notes before publishing the immutable GitHub
+Release. Rerunning it against matching public state must succeed as a no-op.
+
+See Sallyport's [recovery guide](https://github.com/zsumz/sallyport/blob/main/docs/recovery.md)
+if staging or finalization stops partway.

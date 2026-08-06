@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import {
@@ -7,10 +7,16 @@ import {
 } from './release-command.mts';
 import { isStableReleaseVersion } from './release-contract.mts';
 
-const tarballArgument = process.argv[2];
-const version = process.argv[3];
-if (tarballArgument === undefined || version === undefined) {
-    throw new Error('Usage: smoke-release-package.mts <tarball> <version>');
+const tarballArgument = process.argv[2] ?? process.env.SALLYPORT_TARBALL;
+const manifest = JSON.parse(
+    await readFile(new URL('../../package.json', import.meta.url), 'utf8'),
+) as { version?: unknown };
+const version = process.argv[3] ?? manifest.version;
+if (tarballArgument === undefined) {
+    throw new Error('Set SALLYPORT_TARBALL or pass <tarball> <version>.');
+}
+if (typeof version !== 'string') {
+    throw new Error('package.json must declare a string version.');
 }
 if (!isStableReleaseVersion(version)) {
     throw new Error(`Invalid stable release version: ${version}`);
